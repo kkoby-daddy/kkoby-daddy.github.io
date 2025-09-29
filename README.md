@@ -1,1 +1,0 @@
-# kkoby-daddy.github.io
