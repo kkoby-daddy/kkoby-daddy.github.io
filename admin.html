@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>NOVA PET Admin — 오버라이드 + 8확정 집계</title>
+<title>Happy PET Admin — 오버라이드 + 8확정 집계</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
 <style>
   :root{
@@ -118,7 +118,7 @@
   </div>
 
 <header>
-  <div class="brand">NOVA PET Admin</div>
+  <div class="brand">Happy PET Admin</div>
   <div class="right">
     <button class="btn" id="btnReload">원격 새로고침</button>
     <button class="btn ghost" id="btnExport">로컬 다운로드</button>
@@ -239,10 +239,10 @@ async function sha256Hex(text){
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 function getSess(){
-  try{ return JSON.parse(sessionStorage.getItem("nova_admin_ok")||"null"); }catch{ return null; }
+  try{ return JSON.parse(sessionStorage.getItem("Happy_admin_ok")||"null"); }catch{ return null; }
 }
 function setSess(){
-  sessionStorage.setItem("nova_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()}));
+  sessionStorage.setItem("Happy_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()}));
 }
 function sessValid(){
   const s = getSess();
