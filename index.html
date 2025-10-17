@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>노바 서버 펫 계산기 1.2</title>
+<title>Happy 서버 페트 계산기 (25.10.17) </title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
 <style>
   /* 바디 레벨 플로팅 툴팁 */
@@ -179,9 +179,9 @@ svg{ display:block; width:100%; height:100%; }
 </head>
 <body>
 <header>
-  <div class="brand">NOVA SERVER PET Calculator</div>
+  <div class="brand">Happy SERVER PET Calculator</div>
   <div class="ver">
-    <span>1.2 · <span class="muted">문의사항 : 인게임&디스코드 과장</span></span>
+    <span> 문의사항 : 꼬비아빠 </span></span>
         <a class="btn ghost" id="btnDict" href="./petsfilter.html">페트 사전</a>
     <button class="btn ghost" id="btnAdmin">★</button>
   </div>
@@ -190,7 +190,7 @@ svg{ display:block; width:100%; height:100%; }
 <div class="grid">
   <!-- 좌: 펫 선택 -->
   <section class="card">
-    <h3>① 펫 선택</h3>
+    <h3>① 페트 선택</h3>
     <div class="row">
       <div class="col chooser">
         <label>초성 키패드</label>
@@ -203,14 +203,14 @@ svg{ display:block; width:100%; height:100%; }
 
         <div class="row" style="margin-top:8px">
           <div class="col">
-            <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 카르곤, 반기노)" />
+            <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 꼬비)" />
           </div>
           <button class="btn" id="btnClear">지우기</button>
         </div>
         <div class="list" id="petList"></div>
       </div>
     </div>
-    <p class="muted" style="margin-top:8px">팁: 초성만 두세 번 눌러도 후보가 빠르게 걸러집니다. (예: 반기노 = <span class="kbd">ㅂ</span>→<span class="kbd">ㄱ</span>)</p>
+    <p class="muted" style="margin-top:8px">팁:초성만 두세번 눌러도 검색이 가능합니다. (예: 꼬비 = <span class="kbd">ㄲ</span>→<span class="kbd">ㅂ</span>)</p>
   </section>
 
   <!-- 우: 표기 S0 / Sg + 관측 입력 -->
@@ -278,13 +278,13 @@ svg{ display:block; width:100%; height:100%; }
     <div class="row" style="margin-top:12px">
       <button class="btn primary" id="btnCalc">계산</button>
       <button class="btn ghost" id="btnReset">리셋</button>
-      <span class="muted" style="margin-left:auto">스크롤 업/다운으로 수치 조정 가능</span>
+      <span class="muted" style="margin-left:auto">클릭 후 마우스 휠로 Up/Down 가능</span>
     </div>
   </section>
 
 <!-- 좌하단: KPI 강조 -->
 <section class="card" id="resultCard">
-  <h3>③ 결과</h3>
+  <h3>③ 결과 분석</h3>
   <div class="kpis">
     <!-- 성공 확률 -->
     <div class="kpi">
@@ -385,8 +385,8 @@ svg{ display:block; width:100%; height:100%; }
 <script>
 /* ========= 서버 경로 ========= */ 
 const LOCAL_PETS = "data/pets.json";
-const GH_OWNER  = "kokudas";
-const GH_REPO   = "kokudas.github.io";
+const GH_OWNER  = "kkoby-daddy";
+const GH_REPO   = "kkoby-daddy.github.io";
 const GH_BRANCH = "main";
 const PETS_PATH = "data/pets.json";
 const REMOTE_PETS = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${PETS_PATH}`;
@@ -399,9 +399,9 @@ const R8_JSON_CANDIDATES = [
 ];
 
 /* ========= 상수 ========= */
-const LS_TABLE = "novaPetTable_cache";
+const LS_TABLE = "HappyPetTable_cache";
 const TOTAL = 178750;
-const ADMIN_PASS = "kokudas";
+const ADMIN_PASS = "kkoby-daddy";
 
 /* ========= 전역 ========= */
 let GLOBAL_TABLE = {};
