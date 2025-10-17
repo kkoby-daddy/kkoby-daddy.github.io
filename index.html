@@ -182,7 +182,6 @@ svg{ display:block; width:100%; height:100%; }
   <div class="brand">Happy SERVER PET Calculator</div>
   <div class="ver">
     <span> 문의사항 : 꼬비아빠 </span></span>
-        <a class="btn ghost" id="btnDict" href="./petsfilter.html">페트 사전</a>
     <button class="btn ghost" id="btnAdmin">★</button>
   </div>
 </header>
@@ -215,11 +214,11 @@ svg{ display:block; width:100%; height:100%; }
 
   <!-- 우: 표기 S0 / Sg + 관측 입력 -->
   <section class="card">
-    <h3>② 표기치 & 관측치 입력</h3>
+    <h3>② 능력치 확인 및 계산 </h3>
 
     <div class="row">
       <div class="col">
-        <label>표기 초기치 S0 (체/공/방/순)</label>
+        <label>S급 기준 초기치 (체/공/방/순)</label>
         <div class="row">
           <div class="col"><input type="number" id="s0_hp"  step="0.01" placeholder="—" readonly /></div>
           <div class="col"><input type="number" id="s0_atk" step="0.01" placeholder="—" readonly /></div>
@@ -227,7 +226,7 @@ svg{ display:block; width:100%; height:100%; }
           <div class="col"><input type="number" id="s0_agi" step="0.01" placeholder="—" readonly /></div>
         </div>
 
-        <label style="margin-top:10px">표기 성장치 Sg (체/공/방/순)</label>
+        <label style="margin-top:10px">S급 기준 성장률 (체/공/방/순)</label>
         <div class="row">
           <div class="col"><input type="number" id="sg_hp"  step="0.01" placeholder="—" readonly /></div>
           <div class="col"><input type="number" id="sg_atk" step="0.01" placeholder="—" readonly /></div>
@@ -241,7 +240,7 @@ svg{ display:block; width:100%; height:100%; }
 
     <div class="row">
       <div class="col">
-        <label>내 펫 레벨1 관측 표기치 (정수) — 체/공/방/순</label>
+        <label>내 페트 Lv 1 초기치 — 체/공/방/순</label>
         <div class="row">
           <div class="col">
             <input type="number" id="obs_hp"  step="1" />
@@ -356,7 +355,6 @@ svg{ display:block; width:100%; height:100%; }
     <div class="row">
       <div class="col"><span class="muted">총 경우의 수:</span> <span class="badge" id="totMatches">—</span></div>
       <div class="col"><span class="muted">환각 매칭:</span> <span class="badge" id="rank8Matches">—</span></div>
-      <div class="col"><span class="muted">전수(고정):</span> <span class="badge">178,750</span></div>
     </div>
   </div>
 
@@ -367,9 +365,10 @@ svg{ display:block; width:100%; height:100%; }
 </section>
 
 <div class="footer">
-  <p>· “환각(8등급)”은 베이스 합계가 <b>+8</b>인 경우만 집계합니다. (베이스 각 항목 범위 −2..+2, 보너스 총합 10 분배)</p>
-  <p>· 이 계산기는 해피 서버 페트 및 짜얄 계산기 데이터 계수 기반으로 제작되었으며, 이에 따라 결과값은 단순 재미로만 봐 주시길 바랍니다.</p>
-  <p>· 계산기 사용 중 예외사항이나 에러가 있다면, 디스코드 인게임닉 [과장] 으로 연락 주세요. </p>
+  <p>· 입력된 페트 능력치에는 오타가 있을 수 있으니 페트 조회 시 게임 내 페트의 초기치 및 성장률이 같은지 확인하세요.</p>
+  <p>· 업데이트로 추가되는 페트와 기존 페트의 성장률 변경시 데이터가 다르게 나올 수 있습니다. </p>
+  <p>· 페트 계산기 스승님 kokudas님 도움을 받아 제작하였습니다. </p>
+  <p>· 특이사항 : 꼬비 / 남아 / 푸들(갈색) / 20.03.24 출생 / 중성화 O </p>
 </div>
 
 <script>
@@ -1020,19 +1019,19 @@ function enumerate_jjyal(pku, obs){
 
 /* ========= 계산 ========= */
 btnCalc.addEventListener('click', async ()=>{
-  if(!selectedName){ alert("펫을 먼저 선택하세요."); return; }
+  if(!selectedName){ alert("페트를 먼저 선택하세요."); return; }
   const obs=[obshp,obsatk,obsdef,obsagi].map(e=>parseInt(e.value,10));
-  if(obs.some(v=>!Number.isFinite(v))){ alert("관측 표기치(정수)를 모두 입력하세요."); return; }
+  if(obs.some(v=>!Number.isFinite(v))){ alert("페트 초기치를 모두 입력하세요."); return; }
 
   const row=GLOBAL_TABLE[selectedName]||{};
-  if(!row?.s0 || !row?.sg){ alert("이 펫은 S0/SG가 등록되어 있지 않습니다."); return; }
+  if(!row?.s0 || !row?.sg){ alert("이 페트는 등록되어 있지 않습니다."); return; }
 
   let k=row.k, u=row.u;
   if(!(Number.isFinite(k) && u && [u.hp,u.atk,u.def,u.agi].every(Number.isFinite))){
     const S0=[row.s0.hp, row.s0.atk, row.s0.def, row.s0.agi];
     const SG=row.sg;
     const fit = inferKU_JJYAL(S0, SG);
-    if(!fit){ alert("k/u 추정 실패: S0/SG를 확인하세요."); return; }
+    if(!fit){ alert("k/u 추정 실패 : 페트 소숫점 및 성장률을 확인하세요."); return; }
     k=fit.k; u=fit.u;
   }
   const res = enumerate_jjyal({k,u}, obs);
