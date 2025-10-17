@@ -28,15 +28,16 @@
   :root{
     --bg:#0f1115; --panel:#161a22; --muted:#8a9099; --accent:#6aa0ff;
     --ok:#35c759; --warn:#ffb300; --bad:#ff5171; --chip:#232a36;
-    --ring:#1f2530; --text:#e8ecf3;  --ring-size: 60px; --ring-thickness: 10px;
-    --hud-speed: 120;            /* HUD 도는 속도(px/s) */ 
+    --ring:#1f2530; --text:#e8ecf3; --highlight:#fff;
+    --ring-size: 60px; --ring-thickness: 6px; --hud-speed: 120;
     --glow: 8px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    background:linear-gradient(180deg,#0f1115 0%,#0c0f14 100%); color:var(--text);
+    background:var(--bg); color:var(--text);
+    transition: background-color .3s ease, color .3s ease;
   }
   header{
     display:flex; align-items:center; justify-content:space-between;
@@ -45,9 +46,10 @@
   }
   .brand{font-weight:700; letter-spacing:.3px}
   .ver{color:var(--muted); font-size:12px; display:flex; align-items:center; gap:10px}
-  .grid{ max-width:1100px; margin:20px auto; padding:0 16px; display:grid; gap:16px; grid-template-columns: 1fr 1fr; }
+  .grid{ max-width:1300px; margin:20px auto; padding:0 16px; display:grid; gap:16px; grid-template-columns: 1fr 1fr; }
   @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
   .card{background:var(--panel); border:1px solid #232a36; border-radius:14px; padding:16px; box-shadow:0 6px 24px rgba(0,0,0,.25);}
+  .full-width { grid-column: 1 / -1; }
   .card h3{margin:4px 0 12px 0; font-size:16px}
   .row{display:flex; gap:8px; flex-wrap:wrap}
   .col{flex:1 1 0}
@@ -64,6 +66,11 @@
   .btn.primary{ background:linear-gradient(180deg,#2b71ff,#1d56cc); border-color:transparent; color:white;}
   .btn.ghost{ background:transparent;}
   .btn-sm{padding:6px 10px; font-size:12px; border-radius:8px}
+  .btn-group {display: flex;}
+  .btn-group .btn{ border-radius: 0; margin-left: -1px; }
+  .btn-group .btn:first-child{ border-top-left-radius: 10px; border-bottom-left-radius: 10px; margin-left: 0;}
+  .btn-group .btn:last-child{ border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+  .btn-group .btn.active{ background:linear-gradient(180deg,#2b71ff,#1d56cc); border-color:transparent; color:white; filter: none; }
   .muted{color:var(--muted)}
   .chips{display:flex; gap:8px; flex-wrap:wrap}
   .chip{ background:var(--chip); color:#cfd6e3; border:1px solid #2b3242; border-radius:999px; padding:6px 10px; font-size:12px; cursor:pointer; }
@@ -82,11 +89,7 @@
   .kpis{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px}
   @media (max-width: 720px){ .kpis{grid-template-columns: 1fr} }
   .kpi{ display:flex; gap:14px; align-items:center; border:1px solid #2a3040; border-radius:14px; padding:14px; background:radial-gradient(120px 120px at 20% -10%, #11224444, transparent); }
-.ringwrap{ position:relative; width:var(--ring-size); height:var(--ring-size); flex:0 0 var(--ring-size); }
-svg{ display:block; width:100%; height:100%; }
-.track{ stroke: var(--ring); fill:none; stroke-linecap: round; }
-.fill { stroke: var(--accent); fill:none; stroke-linecap: round; transition: stroke .25s ease, stroke-dashoffset .25s linear; }
-
+  
 /* 성공 링 HUD */
 .hud { filter: drop-shadow(0 0 var(--glow) rgba(160,200,255,.6)); }
 .tail{ stroke: #9fc3ff; stroke-linecap: round; opacity:.7; fill:none; }
@@ -186,6 +189,17 @@ svg{ display:block; width:100%; height:100%; }
   </div>
 </header>
 
+<div class="grid">
+    <section class="card full-width">
+        <h3>안내사항</h3>
+        <p class="muted" style="margin: 0; font-size: 14px;">
+          - 입력된 페트 능력치에는 오타가 있을 수 있으니 페트 조회 시 게임 내 페트의 초기치 및 성장률이 같은지 확인하세요.<br>
+          - 업데이트로 추가되는 페트와 기존 페트의 성장률 변경시 데이터가 다르게 나올 수 있습니다. <br>
+          - 페트 계산기 스승님 kokudas님 도움을 받아 제작하였습니다. <br>
+          - 특이사항 : 꼬비 / 남아 / 푸들(갈색) / 20.03.24 출생 / 중성화 O <br>
+        </p>
+    </section>
+  
 <div class="grid">
   <!-- 좌: 펫 선택 -->
   <section class="card">
@@ -363,13 +377,6 @@ svg{ display:block; width:100%; height:100%; }
     <div id="dist"></div>
   </details>
 </section>
-
-<div class="footer">
-  <p>· 입력된 페트 능력치에는 오타가 있을 수 있으니 페트 조회 시 게임 내 페트의 초기치 및 성장률이 같은지 확인하세요.</p>
-  <p>· 업데이트로 추가되는 페트와 기존 페트의 성장률 변경시 데이터가 다르게 나올 수 있습니다. </p>
-  <p>· 페트 계산기 스승님 kokudas님 도움을 받아 제작하였습니다. </p>
-  <p>· 특이사항 : 꼬비 / 남아 / 푸들(갈색) / 20.03.24 출생 / 중성화 O </p>
-</div>
 
 <script>
 /* ========= 서버 경로 ========= */ 
