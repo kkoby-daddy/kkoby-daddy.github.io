@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy 서버 페트 계산기 (25.10.17) </title>
+<title>Happy 서버 페트 계산기 (25.10.17)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
 <style>
   /* 바디 레벨 플로팅 툴팁 */
@@ -29,7 +29,7 @@
     --bg:#0f1115; --panel:#161a22; --muted:#8a9099; --accent:#6aa0ff;
     --ok:#35c759; --warn:#ffb300; --bad:#ff5171; --chip:#232a36;
     --ring:#1f2530; --text:#e8ecf3;  --ring-size: 60px; --ring-thickness: 10px;
-    --hud-speed: 120;            /* HUD 도는 속도(px/s) */ 
+    --hud-speed: 120;             /* HUD 도는 속도(px/s) */ 
     --glow: 8px;
   }
   *{box-sizing:border-box}
@@ -91,7 +91,7 @@ svg{ display:block; width:100%; height:100%; }
 /* 성공 링 HUD */
 .hud { filter: drop-shadow(0 0 var(--glow) rgba(160,200,255,.6)); }
 .tail{ stroke: #9fc3ff; stroke-linecap: round; opacity:.7; fill:none; }
-.core{ stroke: #fff;     stroke-linecap: round; fill:none; }
+.core{ stroke: #fff;      stroke-linecap: round; fill:none; }
 .flare{ fill: #fff; opacity:.95; }
   /* 도넛(기본 게이지) — 크기 고정 + 마스크로 속빈 원 */
 .ring{
@@ -143,7 +143,7 @@ svg{ display:block; width:100%; height:100%; }
 
 /* (선택) 숫자 폭 고정해서 레이아웃 흔들림 방지 */
 #kpiSuccess, #kpiAppear{ display:inline-block; min-width: 9ch; font-variant-numeric: tabular-nums; }
-#kpiTries{   display:inline-block; min-width: 6ch; font-variant-numeric: tabular-nums; }
+#kpiTries{  display:inline-block; min-width: 6ch; font-variant-numeric: tabular-nums; }
 
 
 @media (prefers-reduced-motion: reduce){
@@ -161,17 +161,19 @@ svg{ display:block; width:100%; height:100%; }
   .badge{display:inline-block; min-width:34px; text-align:center; padding:2px 6px; border-radius:6px; background:#223; border:1px solid #356}
   .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
   .footer{max-width:1100px; margin:8px auto 30px; padding:0 16px; color:var(--muted); font-size:12px}
+  .imgbox{width:100%; aspect-ratio: 16/9; border:1px dashed #334055; border-radius:12px; display:grid; place-items:center; background:#0d1117; overflow:hidden;}
+  .imgbox img{width:100%; height:100%; object-fit:cover; display:block}
   .stepper{display:flex; gap:6px; margin-top:6px}
-  
+ 
   /* 숫자 자릿수 고정 + 등폭 숫자 */
 #kpiSuccess, #kpiAppear{
   display:inline-block;
-  min-width: 9ch;               /* "100.0000%" 정도를 수용 */
+  min-width: 9ch;              /* "100.0000%" 정도를 수용 */
   font-variant-numeric: tabular-nums;
 }
 #kpiTries{
   display:inline-block;
-  min-width: 6ch;               /* "123.45" 정도 */
+  min-width: 6ch;              /* "123.45" 정도 */
   font-variant-numeric: tabular-nums;
 }
 </style>
@@ -180,7 +182,8 @@ svg{ display:block; width:100%; height:100%; }
 <header>
   <div class="brand">Happy SERVER PET Calculator</div>
   <div class="ver">
-    <span> 문의사항 : 꼬비아빠 </span></span>
+    <!-- 수정: 불필요한 닫는 </span> 태그 제거 -->
+    <span> 문의사항 : 꼬비아빠 </span>
     <button class="btn ghost" id="btnAdmin">★</button>
   </div>
 </header>
@@ -195,184 +198,189 @@ svg{ display:block; width:100%; height:100%; }
           - 특이사항 : 꼬비 / 남아 / 푸들(갈색) / 20.03.24 출생 / 중성화 O <br>
         </p>
     </section>
-  
-<div class="grid">
-  <!-- 좌: 펫 선택 -->
-  <section class="card">
-    <h3>① 페트 선택</h3>
-    <div class="row">
-      <div class="col chooser">
-        <label>초성 키패드</label>
-        <div id="chosung" class="chips"></div>
+ 
+    <!--
+      수정: 불필요하게 중첩된 <div class="grid">를 제거했습니다.
+      이제 '페트 선택'과 '능력치 확인' 섹션이 메인 그리드 레이아웃의 직접적인 자식 요소가 되어
+      의도한 대로 2열(1fr 1fr)로 배치됩니다.
+    -->
+    <!-- 좌: 펫 선택 -->
+    <section class="card">
+      <h3>① 페트 선택</h3>
+      <div class="row">
+        <div class="col chooser">
+          <label>초성 키패드</label>
+          <div id="chosung" class="chips"></div>
 
-        <div class="row" style="margin-top:6px; align-items:center">
-          <span class="muted" style="min-width:78px">선택한 초성</span>
-          <div id="chosungTokens" class="chips" style="min-height:28px"></div>
-        </div>
-
-        <div class="row" style="margin-top:8px">
-          <div class="col">
-            <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 꼬비)" />
+          <div class="row" style="margin-top:6px; align-items:center">
+            <span class="muted" style="min-width:78px">선택한 초성</span>
+            <div id="chosungTokens" class="chips" style="min-height:28px"></div>
           </div>
-          <button class="btn" id="btnClear">지우기</button>
+
+          <div class="row" style="margin-top:8px">
+            <div class="col">
+              <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 꼬비)" />
+            </div>
+            <button class="btn" id="btnClear">지우기</button>
+          </div>
+          <div class="list" id="petList"></div>
         </div>
-        <div class="list" id="petList"></div>
+      </div>
+      <p class="muted" style="margin-top:8px">팁:초성만 두세번 눌러도 검색이 가능합니다. (예: 꼬비 = <span class="kbd">ㄲ</span>→<span class="kbd">ㅂ</span>)</p>
+    </section>
+
+    <!-- 우: 표기 S0 / Sg + 관측 입력 -->
+    <section class="card">
+      <h3>② 능력치 확인 및 계산 </h3>
+
+      <div class="row">
+        <div class="col">
+          <label>S급 기준 초기치 (체/공/방/순)</label>
+          <div class="row">
+            <div class="col"><input type="number" id="s0_hp"  step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="s0_atk" step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="s0_def" step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="s0_agi" step="0.01" placeholder="—" readonly /></div>
+          </div>
+
+          <label style="margin-top:10px">S급 기준 성장률 (체/공/방/순)</label>
+          <div class="row">
+            <div class="col"><input type="number" id="sg_hp"  step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="sg_atk" step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="sg_def" step="0.01" placeholder="—" readonly /></div>
+            <div class="col"><input type="number" id="sg_agi" step="0.01" placeholder="—" readonly /></div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #2a3040; margin:14px 0" />
+
+      <div class="row">
+        <div class="col">
+          <label>내 페트 Lv 1 초기치 — 체/공/방/순</label>
+          <div class="row">
+            <div class="col">
+              <input type="number" id="obs_hp"  step="1" />
+              <div class="stepper">
+                <button class="btn btn-sm" data-target="obs_hp" data-delta="-1">-1</button>
+                <button class="btn btn-sm" data-target="obs_hp" data-delta="1">+1</button>
+              </div>
+            </div>
+            <div class="col">
+              <input type="number" id="obs_atk" step="1" />
+              <div class="stepper">
+                <button class="btn btn-sm" data-target="obs_atk" data-delta="-1">-1</button>
+                <button class="btn btn-sm" data-target="obs_atk" data-delta="1">+1</button>
+              </div>
+            </div>
+            <div class="col">
+              <input type="number" id="obs_def" step="1" />
+              <div class="stepper">
+                <button class="btn btn-sm" data-target="obs_def" data-delta="-1">-1</button>
+                <button class="btn btn-sm" data-target="obs_def" data-delta="1">+1</button>
+              </div>
+            </div>
+            <div class="col">
+              <input type="number" id="obs_agi" step="1" />
+              <div class="stepper">
+                <button class="btn btn-sm" data-target="obs_agi" data-delta="-1">-1</button>
+                <button class="btn btn-sm" data-target="obs_agi" data-delta="1">+1</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="btnCalc">계산</button>
+        <button class="btn ghost" id="btnReset">리셋</button>
+        <span class="muted" style="margin-left:auto">클릭 후 마우스 휠로 Up/Down 가능</span>
+      </div>
+    </section>
+
+  <!-- 좌하단: KPI 강조 -->
+  <section class="card full-width" id="resultCard">
+    <h3>③ 결과 분석</h3>
+    <div class="kpis">
+      <!-- 성공 확률 -->
+      <div class="kpi">
+        <div class="ringwrap">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <circle id="succPath" cx="50" cy="50" r="45"/>
+              <mask id="succMask" maskUnits="userSpaceOnUse">
+                <circle id="succMaskStroke" cx="50" cy="50" r="45"
+                        fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"
+                        transform="rotate(-90 50 50)"
+                        stroke-dasharray="0 1" stroke-dashoffset="0"/>
+              </mask>
+            </defs>
+
+            <use href="#succPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
+            <use id="succFill" href="#succPath" class="fill" stroke-width="10"
+                 transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
+
+            <!-- HUD 이펙트(성공 링에만) -->
+            <g id="succHUD" class="hud" mask="url(#succMask)">
+              <path id="succTail" class="tail" stroke-width="10"/>
+              <path id="succCore" class="core" stroke-width="6"/>
+              <circle id="succFlare" class="flare" r="3" cx="50" cy="5"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <strong id="kpiSuccess">—%</strong>
+          <small>환각(8등급) 확률</small>
+        </div>
+      </div>
+
+      <!-- 출현 확률 (게이지는 2%까지만 채움) -->
+      <div class="kpi">
+        <div class="ringwrap">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle id="apPath" cx="50" cy="50" r="43" fill="none"/>
+            <use href="#apPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
+            <use id="apFill"  href="#apPath" class="fill"  stroke="#7fd4ff" stroke-width="10"
+                 transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
+          </svg>
+        </div>
+        <div>
+          <strong id="kpiAppear">—%</strong>
+          <span id="apBadge" class="badge" style="display:none">2% ↑</span>
+          <small>출현 확률</small>
+        </div>
+      </div>
+
+      <!-- 성공 기대값 (200↑ 항상 100%) -->
+      <div class="kpi">
+        <div class="ringwrap">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle id="trPath" cx="50" cy="50" r="43" fill="none"/>
+            <use href="#trPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
+            <use id="trFill"  href="#trPath" class="fill" stroke="#999" stroke-width="10"
+                 transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
+          </svg>
+        </div>
+        <div>
+          <strong id="kpiTries">—</strong>
+          <small>성공 기대값(시도)</small>
+        </div>
       </div>
     </div>
-    <p class="muted" style="margin-top:8px">팁:초성만 두세번 눌러도 검색이 가능합니다. (예: 꼬비 = <span class="kbd">ㄲ</span>→<span class="kbd">ㅂ</span>)</p>
+
+    <div style="margin-top:14px">
+      <div class="row">
+        <div class="col"><span class="muted">총 경우의 수:</span> <span class="badge" id="totMatches">—</span></div>
+        <div class="col"><span class="muted">환각 매칭:</span> <span class="badge" id="rank8Matches">—</span></div>
+      </div>
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>등급 분포 자세히 보기</summary>
+      <div id="dist"></div>
+    </details>
   </section>
-
-  <!-- 우: 표기 S0 / Sg + 관측 입력 -->
-  <section class="card">
-    <h3>② 능력치 확인 및 계산 </h3>
-
-    <div class="row">
-      <div class="col">
-        <label>S급 기준 초기치 (체/공/방/순)</label>
-        <div class="row">
-          <div class="col"><input type="number" id="s0_hp"  step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="s0_atk" step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="s0_def" step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="s0_agi" step="0.01" placeholder="—" readonly /></div>
-        </div>
-
-        <label style="margin-top:10px">S급 기준 성장률 (체/공/방/순)</label>
-        <div class="row">
-          <div class="col"><input type="number" id="sg_hp"  step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="sg_atk" step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="sg_def" step="0.01" placeholder="—" readonly /></div>
-          <div class="col"><input type="number" id="sg_agi" step="0.01" placeholder="—" readonly /></div>
-        </div>
-      </div>
-    </div>
-
-    <hr style="border:none;border-top:1px solid #2a3040; margin:14px 0" />
-
-    <div class="row">
-      <div class="col">
-        <label>내 페트 Lv 1 초기치 — 체/공/방/순</label>
-        <div class="row">
-          <div class="col">
-            <input type="number" id="obs_hp"  step="1" />
-            <div class="stepper">
-              <button class="btn btn-sm" data-target="obs_hp" data-delta="-1">-1</button>
-              <button class="btn btn-sm" data-target="obs_hp" data-delta="1">+1</button>
-            </div>
-          </div>
-          <div class="col">
-            <input type="number" id="obs_atk" step="1" />
-            <div class="stepper">
-              <button class="btn btn-sm" data-target="obs_atk" data-delta="-1">-1</button>
-              <button class="btn btn-sm" data-target="obs_atk" data-delta="1">+1</button>
-            </div>
-          </div>
-          <div class="col">
-            <input type="number" id="obs_def" step="1" />
-            <div class="stepper">
-              <button class="btn btn-sm" data-target="obs_def" data-delta="-1">-1</button>
-              <button class="btn btn-sm" data-target="obs_def" data-delta="1">+1</button>
-            </div>
-          </div>
-          <div class="col">
-            <input type="number" id="obs_agi" step="1" />
-            <div class="stepper">
-              <button class="btn btn-sm" data-target="obs_agi" data-delta="-1">-1</button>
-              <button class="btn btn-sm" data-target="obs_agi" data-delta="1">+1</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:12px">
-      <button class="btn primary" id="btnCalc">계산</button>
-      <button class="btn ghost" id="btnReset">리셋</button>
-      <span class="muted" style="margin-left:auto">클릭 후 마우스 휠로 Up/Down 가능</span>
-    </div>
-  </section>
-
-<!-- 좌하단: KPI 강조 -->
-<section class="card" id="resultCard">
-  <h3>③ 결과 분석</h3>
-  <div class="kpis">
-    <!-- 성공 확률 -->
-    <div class="kpi">
-      <div class="ringwrap">
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <circle id="succPath" cx="50" cy="50" r="45"/>
-            <mask id="succMask" maskUnits="userSpaceOnUse">
-              <circle id="succMaskStroke" cx="50" cy="50" r="45"
-                      fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"
-                      transform="rotate(-90 50 50)"
-                      stroke-dasharray="0 1" stroke-dashoffset="0"/>
-            </mask>
-          </defs>
-
-          <use href="#succPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
-          <use id="succFill" href="#succPath" class="fill" stroke-width="10"
-               transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
-
-          <!-- HUD 이펙트(성공 링에만) -->
-          <g id="succHUD" class="hud" mask="url(#succMask)">
-            <path id="succTail" class="tail" stroke-width="10"/>
-            <path id="succCore" class="core" stroke-width="6"/>
-            <circle id="succFlare" class="flare" r="3" cx="50" cy="5"/>
-          </g>
-        </svg>
-      </div>
-      <div>
-        <strong id="kpiSuccess">—%</strong>
-        <small>환각(8등급) 확률</small>
-      </div>
-    </div>
-
-    <!-- 출현 확률 (게이지는 2%까지만 채움) -->
-    <div class="kpi">
-      <div class="ringwrap">
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <circle id="apPath" cx="50" cy="50" r="43" fill="none"/>
-          <use href="#apPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
-          <use id="apFill"  href="#apPath" class="fill"  stroke="#7fd4ff" stroke-width="10"
-               transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
-        </svg>
-      </div>
-      <div>
-        <strong id="kpiAppear">—%</strong>
-        <span id="apBadge" class="badge" style="display:none">2% ↑</span>
-        <small>출현 확률</small>
-      </div>
-    </div>
-
-    <!-- 성공 기대값 (200↑ 항상 100%) -->
-    <div class="kpi">
-      <div class="ringwrap">
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <circle id="trPath" cx="50" cy="50" r="43" fill="none"/>
-          <use href="#trPath" class="track" stroke-width="10" transform="rotate(-90 50 50)"/>
-          <use id="trFill"  href="#trPath" class="fill" stroke="#999" stroke-width="10"
-               transform="rotate(-90 50 50)" stroke-dasharray="0 1" stroke-dashoffset="0"/>
-        </svg>
-      </div>
-      <div>
-        <strong id="kpiTries">—</strong>
-        <small>성공 기대값(시도)</small>
-      </div>
-    </div>
-  </div>
-
-  <div style="margin-top:14px">
-    <div class="row">
-      <div class="col"><span class="muted">총 경우의 수:</span> <span class="badge" id="totMatches">—</span></div>
-      <div class="col"><span class="muted">환각 매칭:</span> <span class="badge" id="rank8Matches">—</span></div>
-    </div>
-  </div>
-
-  <details style="margin-top:12px">
-    <summary>등급 분포 자세히 보기</summary>
-    <div id="dist"></div>
-  </details>
-</section>
+</div>
 
 <script>
 /* ========= 서버 경로 ========= */ 
@@ -774,7 +782,7 @@ const apFill = document.getElementById('apFill');
 const { setFrac: _apSetFrac } = makeRing(apFill, null, ()=> '#7fd4ff');
 function setAppear(pctReal){
   const p = Math.max(0, Number(pctReal)||0);
-  const frac = Math.min(p, 2) / 2;       // 0~2% → 0~100%
+  const frac = Math.min(p, 2) / 2;      // 0~2% → 0~100%
   _apSetFrac(frac);
   document.getElementById('kpiAppear').textContent = p.toFixed(6) + '%';
   document.getElementById('apBadge').style.display = (p>2 ? '' : 'none');
@@ -823,7 +831,7 @@ function showKpis(res){
 
   const matches = res.matches|0;
   const rank8   = res.rank8|0;
-  const appear  = matches/TOTAL*100;                         // 실제 출현 %
+  const appear  = matches/TOTAL*100;                           // 실제 출현 %
   const successPct = matches ? (rank8/matches*100) : 0;      // 성공 %
   const tries = successPct > 0 ? (100/successPct) : Infinity;
 
@@ -924,9 +932,9 @@ function solveUFromSG_JJYAL(SG, e){
     const agi_chk = r2( f.times( u_agi.plus(2.5) ) );
 
     const err = hp_chk.minus(r2(SG.hp)).abs()
-               .plus(atk_chk.minus(r2(SG.atk)).abs())
-               .plus(def_chk.minus(r2(SG.def)).abs())
-               .plus(agi_chk.minus(r2(SG.agi)).abs());
+                      .plus(atk_chk.minus(r2(SG.atk)).abs())
+                      .plus(def_chk.minus(r2(SG.def)).abs())
+                      .plus(agi_chk.minus(r2(SG.agi)).abs());
 
     return { u:{hp:+u_hp, atk:+u_atk, def:+u_def, agi:+u_agi}, e, sg_err:+err };
   }catch(e){ return null; }
