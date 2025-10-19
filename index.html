@@ -29,7 +29,7 @@
     --bg:#0f1115; --panel:#161a22; --muted:#8a9099; --accent:#6aa0ff;
     --ok:#35c759; --warn:#ffb300; --bad:#ff5171; --chip:#232a36;
     --ring:#1f2530; --text:#e8ecf3;  --ring-size: 60px; --ring-thickness: 10px;
-    --hud-speed: 120;             /* HUD 도는 속도(px/s) */ 
+    --hud-speed: 120;              /* HUD 도는 속도(px/s) */ 
     --glow: 8px;
   }
   *{box-sizing:border-box}
@@ -94,7 +94,7 @@ svg{ display:block; width:100%; height:100%; }
 /* 성공 링 HUD */
 .hud { filter: drop-shadow(0 0 var(--glow) rgba(160,200,255,.6)); }
 .tail{ stroke: #9fc3ff; stroke-linecap: round; opacity:.7; fill:none; }
-.core{ stroke: #fff;      stroke-linecap: round; fill:none; }
+.core{ stroke: #fff;       stroke-linecap: round; fill:none; }
 .flare{ fill: #fff; opacity:.95; }
   /* 도넛(기본 게이지) — 크기 고정 + 마스크로 속빈 원 */
 .ring{
@@ -171,12 +171,12 @@ svg{ display:block; width:100%; height:100%; }
   /* 숫자 자릿수 고정 + 등폭 숫자 */
 #kpiSuccess, #kpiAppear{
   display:inline-block;
-  min-width: 9ch;              /* "100.0000%" 정도를 수용 */
+  min-width: 9ch;            /* "100.0000%" 정도를 수용 */
   font-variant-numeric: tabular-nums;
 }
 #kpiTries{
   display:inline-block;
-  min-width: 6ch;              /* "123.45" 정도 */
+  min-width: 6ch;            /* "123.45" 정도 */
   font-variant-numeric: tabular-nums;
 }
 </style>
@@ -201,38 +201,20 @@ svg{ display:block; width:100%; height:100%; }
           - 특이사항 : 꼬비 / 남아 / 푸들(갈색) / 20.03.24 출생 / 중성화 O <br>
         </p>
     </section>
- 
-    <!--
-      수정: 불필요하게 중첩된 <div class="grid">를 제거했습니다.
-      이제 '페트 선택'과 '능력치 확인' 섹션이 메인 그리드 레이아웃의 직접적인 자식 요소가 되어
-      의도한 대로 2열(1fr 1fr)로 배치됩니다.
-    -->
+
     <!-- 좌: 펫 선택 -->
     <section class="card">
       <h3>① 페트 선택</h3>
-      <div class="row">
-        <div class="col chooser">
-          <label>초성 키패드</label>
-          <div id="chosung" class="chips"></div>
+      <div class="chooser">
+        <label>초성 키패드</label>
+        <div id="chosung" class="chips"></div>
 
-          <div class="row" style="margin-top:6px; align-items:center">
-            <span class="muted" style="min-width:78px">선택한 초성</span>
-            <div id="chosungTokens" class="chips" style="min-height:28px"></div>
-          </div>
-
-          <div class="row" style="margin-top:8px">
-            <div class="col">
-              <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 꼬비)" />
-            </div>
-            <button class="btn" id="btnClear">지우기</button>
-          </div>
-          <div class="list" id="petList"></div>
+        <div class="row" style="margin-top:6px; align-items:center">
+          <span class="muted" style="min-width:78px">선택한 초성</span>
+          <div id="chosungTokens" class="chips" style="min-height:28px"></div>
         </div>
-      </div>
-      <p class="muted" style="margin-top:8px">팁:초성만 두세번 눌러도 검색이 가능합니다. (예: 꼬비 = <span class="kbd">ㄲ</span>→<span class="kbd">ㅂ</span>)</p>
-    </section>
-
-        <!-- ★ 즐겨찾기 바 -->
+        
+        <!-- ★ 수정: 즐겨찾기 바를 페트 선택 카드 안으로 이동시켰습니다. -->
         <div class="row" style="margin-top:6px; align-items:center">
           <span class="muted" style="min-width:78px">즐겨찾기</span>
           <div id="favChips" class="chips" style="min-height:28px"></div>
@@ -240,16 +222,15 @@ svg{ display:block; width:100%; height:100%; }
 
         <div class="row" style="margin-top:8px">
           <div class="col">
-            <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 카르곤, 반기노)" />
+            <input type="text" id="petSearch" placeholder="이름으로 검색 (예: 꼬비)" />
           </div>
           <button class="btn" id="btnClear">지우기</button>
         </div>
         <div class="list" id="petList"></div>
       </div>
-    </div>
-    <p class="muted" style="margin-top:8px">팁: 초성만 두세 번 눌러도 후보가 빠르게 걸러집니다. (예: 반기노 = <span class="kbd">ㅂ</span>→<span class="kbd">ㄱ</span>)</p>
-  </section>
-  
+      <p class="muted" style="margin-top:8px">팁:초성만 두세번 눌러도 검색이 가능합니다. (예: 꼬비 = <span class="kbd">ㄲ</span>→<span class="kbd">ㅂ</span>)</p>
+    </section>
+ 
     <!-- 우: 표기 S0 / Sg + 관측 입력 -->
     <section class="card">
       <h3>② 능력치 확인 및 계산 </h3>
@@ -403,6 +384,9 @@ svg{ display:block; width:100%; height:100%; }
   </section>
 </div>
 
+<!-- ★ 수정: body 가장 아래에 토스트 메시지 래퍼를 추가했습니다. -->
+<div id="toastWrap" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:10000; display:flex; flex-direction:column; gap:8px; align-items:center;"></div>
+
 <script>
 /* ========= 서버 경로 ========= */ 
 const LOCAL_PETS = "data/pets.json";
@@ -437,11 +421,24 @@ function saveFavs(){ localStorage.setItem(FAV_LS_KEY, JSON.stringify(FAVS)); }
 function isFav(name){ return FAVS.includes(name); }
 function showToast(msg, ms=1500){
   const wrap = document.getElementById("toastWrap");
+  if (!wrap) return;
   const t = document.createElement("div");
-  t.className = "toast"; t.textContent = msg;
+  t.className = "toast";
+  t.style.cssText = `
+    background: #232a36; color: #e8ecf3; padding: 10px 16px; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3); font-size: 14px;
+    opacity: 0; transform: translateY(10px); transition: all .25s ease;
+  `;
+  t.textContent = msg;
   wrap.appendChild(t);
-  void t.offsetWidth; t.classList.add("show");
-  setTimeout(()=>{ t.classList.remove("show"); setTimeout(()=>wrap.removeChild(t), 250); }, ms);
+  void t.offsetWidth; // reflow
+  t.style.opacity = '1';
+  t.style.transform = 'translateY(0)';
+  setTimeout(()=>{
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(10px)';
+    setTimeout(()=>wrap.removeChild(t), 250);
+  }, ms);
 }
 function renderFavChips(){
   const box = document.getElementById("favChips");
@@ -476,7 +473,7 @@ function removeFav(name){
   if(i>=0){ FAVS.splice(i,1); saveFavs(); renderFavChips(); renderPetList(); showToast("즐겨찾기에서 제거했습니다."); }
 }
 function toggleFav(name){ isFav(name) ? removeFav(name) : addFav(name); }
-  
+ 
 /* ========= 전역 ========= */
 let GLOBAL_TABLE = {};
 let ALL_NAMES = [];
@@ -528,7 +525,7 @@ async function loadGlobalTable(){
   }
   ALL_NAMES = Object.keys(GLOBAL_TABLE).sort((a,b)=>a.localeCompare(b,'ko'));
     // 즐겨찾기 검증(없는 이름 제거)
-  FAVS = FAVS.filter(n => GLOBAL_TABLE[n]);
+  FAVS = loadFavs().filter(n => GLOBAL_TABLE[n]);
   saveFavs();
   renderFavChips();
 }
@@ -697,7 +694,7 @@ function renderPetList(){
     tag1.className='tag ' + (GLOBAL_TABLE[n]?'ok':'warn');
     tag1.textContent = GLOBAL_TABLE[n] ? '등록됨' : '미등록';
     right.appendChild(tag1);
-    
+   
     /* ★ 즐겨찾기 별 배지 */
     const star = document.createElement('span');
     const favOn = isFav(n);
@@ -874,7 +871,7 @@ const apFill = document.getElementById('apFill');
 const { setFrac: _apSetFrac } = makeRing(apFill, null, ()=> '#7fd4ff');
 function setAppear(pctReal){
   const p = Math.max(0, Number(pctReal)||0);
-  const frac = Math.min(p, 2) / 2;      // 0~2% → 0~100%
+  const frac = Math.min(p, 2) / 2;       // 0~2% → 0~100%
   _apSetFrac(frac);
   document.getElementById('kpiAppear').textContent = p.toFixed(6) + '%';
   document.getElementById('apBadge').style.display = (p>2 ? '' : 'none');
@@ -924,7 +921,7 @@ function showKpis(res){
   const matches = res.matches|0;
   const rank8   = res.rank8|0;
   const appear  = matches/TOTAL*100;                           // 실제 출현 %
-  const successPct = matches ? (rank8/matches*100) : 0;      // 성공 %
+  const successPct = matches ? (rank8/matches*100) : 0;       // 성공 %
   const tries = successPct > 0 ? (100/successPct) : Infinity;
 
   // 수치 텍스트
@@ -1024,9 +1021,9 @@ function solveUFromSG_JJYAL(SG, e){
     const agi_chk = r2( f.times( u_agi.plus(2.5) ) );
 
     const err = hp_chk.minus(r2(SG.hp)).abs()
-                      .plus(atk_chk.minus(r2(SG.atk)).abs())
-                      .plus(def_chk.minus(r2(SG.def)).abs())
-                      .plus(agi_chk.minus(r2(SG.agi)).abs());
+                           .plus(atk_chk.minus(r2(SG.atk)).abs())
+                           .plus(def_chk.minus(r2(SG.def)).abs())
+                           .plus(agi_chk.minus(r2(SG.agi)).abs());
 
     return { u:{hp:+u_hp, atk:+u_atk, def:+u_def, agi:+u_agi}, e, sg_err:+err };
   }catch(e){ return null; }
