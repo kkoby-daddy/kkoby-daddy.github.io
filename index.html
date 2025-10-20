@@ -29,7 +29,7 @@
     --bg:#0f1115; --panel:#161a22; --muted:#8a9099; --accent:#6aa0ff;
     --ok:#35c759; --warn:#ffb300; --bad:#ff5171; --chip:#232a36;
     --ring:#1f2530; --text:#e8ecf3;  --ring-size: 60px; --ring-thickness: 10px;
-    --hud-speed: 120;              /* HUD 도는 속도(px/s) */ 
+    --hud-speed: 120;             /* HUD 도는 속도(px/s) */
     --glow: 8px;
   }
   *{box-sizing:border-box}
@@ -77,8 +77,6 @@
   .item.selected{ background:#1b2535; outline:2px solid #30518d; }
   .tags{display:flex; gap:6px; align-items:center}
   .tag{font-size:11px;border:1px solid #2b3242;border-radius:999px;padding:2px 8px}
-  .tag.ok{border-color:#275a34; background:#102214; color:#35c759}
-  .tag.warn{border-color:#7a5b0e; background:#241a05; color:#ffb300}
   .tag.rank8{border-color:#2b4a82; background:#0d1a33; color:#88b5ff}
   /* ★ 즐겨찾기 배지 */
   .tag.fav{cursor:pointer; user-select:none}
@@ -96,66 +94,6 @@ svg{ display:block; width:100%; height:100%; }
 .tail{ stroke: #9fc3ff; stroke-linecap: round; opacity:.7; fill:none; }
 .core{ stroke: #fff;       stroke-linecap: round; fill:none; }
 .flare{ fill: #fff; opacity:.95; }
-  /* 도넛(기본 게이지) — 크기 고정 + 마스크로 속빈 원 */
-.ring{
-  width: var(--ring-size);
-  height: var(--ring-size);
-  flex: 0 0 var(--ring-size);
-  position: relative;
-  border-radius: 50%;
-  overflow: hidden;
-  isolation: isolate;
-  --p: 0deg; /* JS에서 진행각 설정 */
-  background: conic-gradient(var(--accent) 0 var(--p), var(--ring) 0);
-  /* 속 비우기(도넛) 마스크 */
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-thickness)), #000 0);
-          mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-thickness)), #000 0);
-}
-
-
-/* ★ 성공 링에만 HUD 스윕 */
-#ringSuccess::after{
-  content:"";
-  position:absolute; inset:0;
-  border-radius:50%;
-  pointer-events:none;
-  opacity: calc(var(--sweep-on, 0) * var(--sweep-opacity)); /* 진행 0%면 완전 숨김 */
-  filter: blur(var(--sweep-blur));
-  will-change: transform;
-  animation: ring-sweep var(--sweep-speed) linear infinite;
-  /* 얇은 빛 웨지 패턴 */
-  background:
-    repeating-conic-gradient(
-      from -90deg,
-      rgba(255,255,255,0)   0deg 6deg,
-      rgba(255,255,255,.9)  6deg 7.2deg,
-      rgba(255,255,255,0)  7.2deg 14.4deg
-    );
-  /* (1) 도넛 모양으로 구멍 + (2) 진행각까지만 표시 */
-  -webkit-mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - var(--ring-thickness)), #000 0),
-    conic-gradient(#000 0 calc(var(--p) + .0001deg), transparent 0); /* 0deg 버그회피용 +ε */
-  -webkit-mask-composite: source-in;
-          mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - var(--ring-thickness)), #000 0),
-    conic-gradient(#000 0 calc(var(--p) + .0001deg), transparent 0);
-          mask-composite: intersect;
-}
-
-@keyframes ring-sweep{ to { transform: rotate(360deg); } }
-
-/* (선택) 숫자 폭 고정해서 레이아웃 흔들림 방지 */
-#kpiSuccess, #kpiAppear{ display:inline-block; min-width: 9ch; font-variant-numeric: tabular-nums; }
-#kpiTries{  display:inline-block; min-width: 6ch; font-variant-numeric: tabular-nums; }
-
-
-@media (prefers-reduced-motion: reduce){
-  #ringSuccess::after{ animation: none; opacity: .25; }
-}
-
-
-
-
   .kpi strong{font-size:20px; color:var(--highlight)}
   .kpi small{display:block; color:var(--muted)}
   .table{width:100%; border-collapse:collapse; font-size:13px}
@@ -167,16 +105,16 @@ svg{ display:block; width:100%; height:100%; }
   .imgbox{width:100%; aspect-ratio: 16/9; border:1px dashed #334055; border-radius:12px; display:grid; place-items:center; background:#0d1117; overflow:hidden;}
   .imgbox img{width:100%; height:100%; object-fit:cover; display:block}
   .stepper{display:flex; gap:6px; margin-top:6px}
- 
+  
   /* 숫자 자릿수 고정 + 등폭 숫자 */
 #kpiSuccess, #kpiAppear{
   display:inline-block;
-  min-width: 9ch;            /* "100.0000%" 정도를 수용 */
+  min-width: 9ch;         /* "100.0000%" 정도를 수용 */
   font-variant-numeric: tabular-nums;
 }
 #kpiTries{
   display:inline-block;
-  min-width: 6ch;            /* "123.45" 정도 */
+  min-width: 6ch;         /* "123.45" 정도 */
   font-variant-numeric: tabular-nums;
 }
 </style>
@@ -185,7 +123,6 @@ svg{ display:block; width:100%; height:100%; }
 <header>
   <div class="brand">Happy SERVER PET Calculator</div>
   <div class="ver">
-    <!-- 수정: 불필요한 닫는 </span> 태그 제거 -->
     <span> 문의사항 : 꼬비아빠 </span>
     <button class="btn ghost" id="btnAdmin">★</button>
   </div>
@@ -214,7 +151,6 @@ svg{ display:block; width:100%; height:100%; }
           <div id="chosungTokens" class="chips" style="min-height:28px"></div>
         </div>
         
-        <!-- ★ 수정: 즐겨찾기 바를 페트 선택 카드 안으로 이동시켰습니다. -->
         <div class="row" style="margin-top:6px; align-items:center">
           <span class="muted" style="min-width:78px">즐겨찾기</span>
           <div id="favChips" class="chips" style="min-height:28px"></div>
@@ -384,11 +320,10 @@ svg{ display:block; width:100%; height:100%; }
   </section>
 </div>
 
-<!-- ★ 수정: body 가장 아래에 토스트 메시지 래퍼를 추가했습니다. -->
 <div id="toastWrap" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:10000; display:flex; flex-direction:column; gap:8px; align-items:center;"></div>
 
 <script>
-/* ========= 서버 경로 ========= */ 
+/* ========= 서버 경로 ========= */
 const LOCAL_PETS = "data/pets.json";
 const GH_OWNER  = "kkoby-daddy";
 const GH_REPO   = "kkoby-daddy.github.io";
@@ -568,10 +503,6 @@ const obsagi= document.getElementById('obs_agi');
 const kpiSuccess = document.getElementById('kpiSuccess');
 const kpiAppear  = document.getElementById('kpiAppear');
 const kpiTries   = document.getElementById('kpiTries');
-const ringSuccess= document.getElementById('ringSuccess');
-const ringAppear = document.getElementById('ringAppear');
-const totMatches = document.getElementById('totMatches');
-const rank8Matches = document.getElementById('rank8Matches');
 const distBox = document.getElementById('dist');
 
 const btnCalc = document.getElementById('btnCalc');
@@ -689,12 +620,6 @@ function renderPetList(){
     const left=document.createElement('div'); left.textContent = n;
     const right=document.createElement('div'); right.className="tags";
 
-    // 등록/미등록 배지
-    const tag1=document.createElement('span');
-    tag1.className='tag ' + (GLOBAL_TABLE[n]?'ok':'warn');
-    tag1.textContent = GLOBAL_TABLE[n] ? '등록됨' : '미등록';
-    right.appendChild(tag1);
-   
     /* ★ 즐겨찾기 별 배지 */
     const star = document.createElement('span');
     const favOn = isFav(n);
@@ -864,7 +789,6 @@ function setSuccess(pct){
     hud.style.opacity=1; if(!run){ run=true; lastTs=0; requestAnimationFrame(tick); }
   }
 }
-window.setSuccess = setSuccess;
 
 /* ===== 2) 출현% — 게이지 최대 2% ===== */
 const apFill = document.getElementById('apFill');
@@ -876,7 +800,6 @@ function setAppear(pctReal){
   document.getElementById('kpiAppear').textContent = p.toFixed(6) + '%';
   document.getElementById('apBadge').style.display = (p>2 ? '' : 'none');
 }
-window.setAppear = setAppear;
 
 /* ===== 3) 기대값 — 200↑ 항상 100% + 색상(초/노/빨) ===== */
 const trFill = document.getElementById('trFill');
@@ -899,44 +822,33 @@ function setTries(t){
   _trSetFrac(frac);
   document.getElementById('kpiTries').textContent = (Number.isFinite(t)? Math.round(currTries) : '—');
 }
-window.setTries = setTries;
 /* ===== KPI 렌더 교체 ===== */
 function showKpis(res){
   if(!res){
-    // 값 표시
     kpiSuccess.textContent = "—%";
     kpiAppear .textContent = "—%";
     kpiTries  .textContent = "—";
-    // 링 리셋(크기·비율 유지)
     setSuccess(0);
     setAppear(0);
     setTries(1);
-    // 부가정보 리셋
-    totMatches.textContent = "—";
-    rank8Matches.textContent = "—";
+    document.getElementById('totMatches').textContent = "—";
+    document.getElementById('rank8Matches').textContent = "—";
     distBox.innerHTML = "";
     return;
   }
 
   const matches = res.matches|0;
   const rank8   = res.rank8|0;
-  const appear  = matches/TOTAL*100;                           // 실제 출현 %
-  const successPct = matches ? (rank8/matches*100) : 0;       // 성공 %
+  const appear  = matches/TOTAL*100;
+  const successPct = matches ? (rank8/matches*100) : 0;
   const tries = successPct > 0 ? (100/successPct) : Infinity;
 
-  // 수치 텍스트
-  kpiSuccess.textContent = fmtPct(successPct);
-  kpiAppear .textContent = fmtPct(appear);
-  kpiTries  .textContent = (isFinite(tries) ? tries.toFixed(2) : "—");
-
-  // 링 반영
   setSuccess(successPct);
   setAppear(appear);
-  setTries(isFinite(tries) ? tries : 200); // 성공확률 0% → 200으로 고정(항상 100%)
+  setTries(isFinite(tries) ? tries : 200);
 
-  // 요약 수치 및 분포
-  totMatches.textContent   = matches.toLocaleString();
-  rank8Matches.textContent = rank8.toLocaleString();
+  document.getElementById('totMatches').textContent   = matches.toLocaleString();
+  document.getElementById('rank8Matches').textContent = rank8.toLocaleString();
 
   const entries = Object.entries(res.dist)
     .map(([r,c]) => ({r:parseInt(r,10), c}))
@@ -972,8 +884,7 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ========= k/u 추정 ========= */
-//const ESET = [575, 555, 535, 515, 495, 475, 455, 435];
-  const ESET = Array.from({length: ((575-435)/5)+1 }, (_,i) => 575 - i*5);
+const ESET = Array.from({length: ((575-435)/5)+1 }, (_,i) => 575 - i*5);
 
 function solveUFromSG_JJYAL(SG, e){
   try{
@@ -1021,9 +932,9 @@ function solveUFromSG_JJYAL(SG, e){
     const agi_chk = r2( f.times( u_agi.plus(2.5) ) );
 
     const err = hp_chk.minus(r2(SG.hp)).abs()
-                           .plus(atk_chk.minus(r2(SG.atk)).abs())
-                           .plus(def_chk.minus(r2(SG.def)).abs())
-                           .plus(agi_chk.minus(r2(SG.agi)).abs());
+                         .plus(atk_chk.minus(r2(SG.atk)).abs())
+                         .plus(def_chk.minus(r2(SG.def)).abs())
+                         .plus(agi_chk.minus(r2(SG.agi)).abs());
 
     return { u:{hp:+u_hp, atk:+u_atk, def:+u_def, agi:+u_agi}, e, sg_err:+err };
   }catch(e){ return null; }
@@ -1158,7 +1069,6 @@ btnClear.addEventListener('click', ()=>{
 
 /* ========= 부팅 ========= */
 (async function init(){
-  console.log("[init] start");
   await loadGlobalTable();
   await loadRank8Map();
   console.log("[init] pets:", Object.keys(GLOBAL_TABLE).length, "rank8 keys:", Object.keys(R8MAP).length);
@@ -1167,3 +1077,4 @@ btnClear.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
