@@ -225,7 +225,8 @@
     <div class="row" style="margin-bottom:8px; gap:6px;" id="r8FilterChips">
       <label style="margin:0; align-self:center; font-size:13px; color:var(--muted);">필터:</label>
       <button class="btn ghost btn-sm filter-btn active" data-filter="all">전체</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="has_ku">k/u 있음</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="todo_r8">R8 작업</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="has_r8">R8 있음</button>
       <button class="btn ghost btn-sm filter-btn" data-filter="no_ku">k/u 없음</button>
     </div>
     <!-- --- /신규/수정 --- -->
@@ -320,7 +321,8 @@ const LS_KEY = "adminPetsCache_v2";
 /* ====== 상태 ====== */
 let DB = {}; let ORDER = []; let CURRENT = null;
 let currentFilter = 'all';
-let currentR8Filter = 'all'; // --- 신규 ---
+let currentR8Filter = 'all';
+let R8_DB = {}; // --- 신규 ---
 let R8_RESULT = {}; let R8_REMOTE_SHA = null;
 
 /* ====== 유틸 ====== */
@@ -794,7 +796,7 @@ async function commitPets(){
   });
   if(!putRes.ok){ 
     const t = await putRes.text().catch(()=>"(no body)");
-    alert("커밋 실패: " + putRes.status + "\n" + t);
+    alert("커밋 실패: " + res.status + "\n" + t);
     return;
   }
   alert("pets.json 커밋 성공!");
@@ -805,14 +807,25 @@ function renderR8List(){
   const box = $("r8List");
   box.innerHTML = "";
 
-  // --- 신규/수정: R8 목록 필터링 ---
+  // --- 신규/수정: R8 목록 필터링 (R8_DB 기준) ---
   const filteredOrder = ORDER.filter(n => {
     const r = DB[n] || {};
     const hasKU = Number.isFinite(r?.k) && r?.u && [r.u.hp, r.u.atk, r.u.def, r.u.agi].every(Number.isFinite);
-    if (currentR8Filter === 'has_ku') {
-      return hasKU;
+    
+    // R8_DB에 키가 있고, 그 값이 배열이거나 obs_100_rank8 배열을 갖고 있으며 비어있지 않은지 확인
+    const r8Entry = R8_DB[n];
+    const hasR8 = r8Entry && (
+                    (Array.isArray(r8Entry) && r8Entry.length > 0) || 
+                    (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0)
+                  );
+
+    if (currentR8Filter === 'todo_r8') { // R8 작업 (k/u는 있고, R8 데이터는 없음)
+      return hasKU && !hasR8;
     }
-    if (currentR8Filter === 'no_ku') {
+    if (currentR8Filter === 'has_r8') { // R8 있음
+      return hasR8; // k/u 여부와 상관없이 R8 데이터가 있으면 표시
+    }
+    if (currentR8Filter === 'no_ku') { // k/u 없음
       return !hasKU;
     }
     return true; // 'all'
@@ -823,6 +836,13 @@ function renderR8List(){
   filteredOrder.forEach(n=>{
     const r = DB[n]||{};
     const hasKU = Number.isFinite(r?.k) && r?.u && [r.u.hp,r.u.atk,r.u.def,r.u.agi].every(Number.isFinite);
+    
+    // --- 신규: R8_DB 확인 ---
+    const r8Entry = R8_DB[n];
+    const hasR8 = r8Entry && (
+                    (Array.isArray(r8Entry) && r8Entry.length > 0) || 
+                    (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0)
+                  );
 
     const lab = document.createElement('label');
     lab.className = "r8item" + (hasKU ? "" : " disabled");
@@ -835,8 +855,22 @@ function renderR8List(){
     lab.appendChild(nameSpan);
 
     const extra = document.createElement('span'); extra.className = "extra";
-    if(r?.ku_override){ const tag = document.createElement('span'); tag.className="tag warn"; tag.textContent="override"; extra.appendChild(tag); }
-    if(!hasKU){ const tag = document.createElement('span'); tag.className="tag"; tag.textContent="k/u 없음"; extra.appendChild(tag); }
+    
+    // --- 신규: 태그 로직 수정 (R8_DB 기준) ---
+    if(hasR8){
+      const tag = document.createElement('span'); tag.className="tag ok"; tag.textContent="R8 있음"; 
+      extra.appendChild(tag);
+    }
+    if(r?.ku_override){ 
+      const tag = document.createElement('span'); tag.className="tag warn"; tag.textContent="override"; 
+      extra.appendChild(tag); 
+    }
+    if(!hasKU){ 
+      const tag = document.createElement('span'); tag.className="tag"; tag.textContent="k/u 없음"; 
+      extra.appendChild(tag); 
+    }
+    // --- /신규 ---
+    
     lab.appendChild(extra);
 
     box.appendChild(lab);
@@ -925,10 +959,23 @@ $("btnR8Commit").addEventListener("click", async ()=>{
   if(head.status===200){
     const meta = await head.json();
     sha = meta.sha;
-    const text = await fetch(REMOTE_R8).then(r=>r.text());
-    try{ remoteMap = JSON.parse(text); }catch{ remoteMap = {}; }
+    // --- 신규: R8_DB를 기본값으로 사용 ---
+    remoteMap = R8_DB || {}; 
+    // 만약을 위해 최신 데이터 다시 가져오기 시도 (R8_DB가 로드 실패했을 경우)
+    if (Object.keys(remoteMap).length === 0) {
+      try {
+        const text = await fetch(REMOTE_R8).then(r=>r.text());
+        remoteMap = JSON.parse(text);
+      } catch {
+        remoteMap = {};
+      }
+    }
   }else if(head.status!==404){
     alert("full.json 메타 조회 실패: HTTP "+head.status); return;
+  } else {
+    // 404 (파일 없음)
+    remoteMap = {};
+    sha = null;
   }
 
   const out = {...remoteMap};
@@ -960,6 +1007,9 @@ $("btnR8Commit").addEventListener("click", async ()=>{
     return;
   }
   alert("guaranteed_rank8.full.json 커밋 성공!");
+  // --- 신규: 커밋 성공 시 R8_DB 갱신 ---
+  R8_DB = out;
+  renderR8List();
 });
 
 /* ====== 데이터 로드 ====== */
@@ -968,8 +1018,8 @@ async function loadRemote(){
   DB = (obj && !obj.__404__) ? obj : {};
   sortNames(); 
   renderList();
-  renderR8List(); // ★ 원격 로드 시 R8 목록도 갱신
-  if(ORDER.length) loadForm(ORDER[0]);
+  // renderR8List(); // R8 목록 갱신은 init에서 R8_DB 로드 후 한꺼번에
+  if(ORDER.length && !CURRENT) loadForm(ORDER[0]);
   saveLS();
 }
 (async function init(){
@@ -978,15 +1028,30 @@ async function loadRemote(){
     DB = local;
     sortNames(); 
     renderList();
-    renderR8List(); // ★ 로컬 로드 시 R8 목록도 갱신
-    if(ORDER.length) loadForm(ORDER[0]);
+    // renderR8List(); // R8_DB 로드 후에
   }
+
+  // Load Pets (DB)
   try{
-    await loadRemote();
+    await loadRemote(); // This fetches pets.json
   }catch(e){
     console.warn("원격 로드 실패, 로컬 캐시로 동작", e);
-    if(!local){ DB={}; renderList(); renderR8List(); }
+    if(!local){ DB={}; renderList(); }
   }
+
+  // --- 신규: R8 DB 로드 ---
+  try {
+    const r8_obj = await fetchJSON(REMOTE_R8);
+    R8_DB = (r8_obj && !r8_obj.__404__) ? r8_obj : {};
+    console.log("R8_DB loaded:", Object.keys(R8_DB).length);
+  } catch(e) {
+    console.warn("R8 원격 로드 실패, 빈 객체로 동작", e);
+    R8_DB = {};
+  }
+  // --- /신규 ---
+
+  renderR8List(); // ★ DB와 R8_DB가 모두 준비된 후 R8 목록 렌더링
+  if(ORDER.length && !CURRENT) loadForm(ORDER[0]); // 첫 번째 아이템 로드
 })();
 </script>
 </body>
