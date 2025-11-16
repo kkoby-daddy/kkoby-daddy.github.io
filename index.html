@@ -564,12 +564,16 @@ petList.addEventListener('touchstart', (e)=>{
 window.addEventListener('scroll', hideTip, true);
 window.addEventListener('resize', hideTip);
 
-/* ===== 관리자 버튼 ===== */
+/* ===== 관리자 버튼 (수정됨) ===== */
 document.getElementById('btnAdmin').addEventListener('click', ()=>{
-  const pw = prompt('관리자 암호를 입력하세요.');
-  if (pw === null) return;
-  if (pw === ADMIN_PASS) location.href = "./admin.html";
-  else alert('암호가 올바르지 않습니다.');
+  // 원본 코드 (주석 처리)
+  // const pw = prompt('관리자 암호를 입력하세요.');
+  // if (pw === null) return;
+  // if (pw === ADMIN_PASS) location.href = "./admin.html";
+  // else alert('암호가 올바르지 않습니다.');
+
+  // 수정된 코드: 클릭 시 바로 admin.html로 이동
+  location.href = "./admin.html";
 });
 
 /* ========= 초성 키패드 ========= */
@@ -1077,4 +1081,3 @@ btnClear.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
