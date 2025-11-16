@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy PET Admin — 오버라이드 + 8확정 집계</title>
+<title>Happy PET Admin — 오버라이드 + 8확정 집계 (소숫점 계산기 추가)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
 <style>
   :root{
@@ -208,6 +208,18 @@
     </div>
 
     <div id="consistency" class="callout" style="margin-top:10px;display:none"></div>
+
+    <!-- ★★★ [추가됨] 소숫점 역산 도우미 ★★★ -->
+    <div style="margin-top:10px">
+      <div class="row" style="align-items:center;margin-bottom:4px">
+        <span class="note" style="margin-left:2px">
+          <b>소숫점 역산 도우미</b> (S0/SG → 실제 값)
+        </span>
+        <button class="btn ghost" id="btnDecCalc" style="margin-left:auto">소숫점 계산</button>
+      </div>
+      <div id="decPanel" class="callout" style="display:none;font-size:13px"></div>
+    </div>
+    <!-- ★★★ [추가됨] 끝 ★★★ -->
 
     <div class="hr"></div>
 
@@ -431,6 +443,48 @@ function inferKU_STRICT(S0, SG){
   }
   return null;
 }
+
+/* ★★★ [추가됨] S0/SG 실제 소숫점 계산 ★★★ */
+/* k/u(원래 u) 를 알 때, floor 전에 존재하는 "진짜" S0 값 */
+function computeS0RealFromKU(k, u){
+  Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
+  const fac = new Decimal(k).dividedBy(100);
+
+  const hpB  = new Decimal(u.hp).plus(4.5).times(fac);
+  const atkB = new Decimal(u.atk).plus(4.5).times(fac);
+  const defB = new Decimal(u.def).plus(4.5).times(fac);
+  const agiB = new Decimal(u.agi).plus(4.5).times(fac);
+
+  const hp  = hpB.times(4).plus(atkB).plus(defB).plus(agiB);
+  const atk = hpB.times(0.1).plus(atkB).plus(defB.times(0.1)).plus(agiB.times(0.05));
+  const def = hpB.times(0.1).plus(atkB.times(0.1)).plus(defB).plus(agiB.times(0.05));
+  const agi = agiB;
+
+  return { hp, atk, def, agi };   // Decimal 객체들
+}
+
+/* SG 표기에서 e(에센스)와 "진짜" SG 소숫점 계산 */
+function computeSGRealFromKU(u, SG){
+  Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
+  const uAgiPlus = new Decimal(u.agi).plus(4.5);
+
+  // sg_agi = e/10000 * (u_agi+4.5)
+  const e = new Decimal(SG.agi).times(10000).dividedBy(uAgiPlus);
+  const fac = e.dividedBy(10000);
+
+  const uHpP  = new Decimal(u.hp).plus(4.5);
+  const uAtkP = new Decimal(u.atk).plus(4.5);
+  const uDefP = new Decimal(u.def).plus(4.5);
+
+  const hp  = fac.times( uHpP.times(4).plus(uAtkP).plus(uDefP).plus(uAgiPlus) );
+  const atk = fac.times( uHpP.times(0.1).plus(uAtkP).plus(uDefP.times(0.1)).plus(uAgiPlus.times(0.05)) );
+  const def = fac.times( uHpP.times(0.1).plus(uAtkP.times(0.1)).plus(uDefP).plus(uAgiPlus.times(0.05)) );
+  const agi = fac.times( uAgiPlus );
+
+  return { e, hp, atk, def, agi };   // e, Decimal 객체들
+}
+/* ★★★ [추가됨] 끝 ★★★ */
+
 
 /* ====== R8 집계 엔진 (원래 u 사용) ====== */
 function collectR8ObsForKU(k,u){
@@ -656,6 +710,145 @@ function updateConsistency(){
   }
 }
 
+/* ★★★ [추가됨] 소숫점 역산 도우미 패널 ★★★ */
+function renderDecimalsPanel(){
+  const box = $("decPanel");
+  box.className = "callout";
+  box.style.display = "none";
+  box.innerHTML = "";
+
+  const f = gatherForm();
+  if(!f.name){
+    alert("이름을 먼저 입력하세요.");
+    return;
+  }
+  if([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].some(v=>v==null) ||
+     [f.sg.hp,f.sg.atk,f.sg.def,f.sg.agi].some(v=>v==null)){
+    alert("S0/SG를 모두 채운 뒤 사용해 주세요.");
+    return;
+  }
+
+  let k = null, u = null, src = "";
+
+  // 1) 오버라이드 k/u가 완전히 들어있으면 그걸 우선 사용
+  const hasOverride =
+    f.ovr &&
+    Number.isFinite(f.k) &&
+    f.u && [f.u.hp,f.u.atk,f.u.def,f.u.agi].every(Number.isFinite);
+
+  if(hasOverride){
+    k = f.k; u = f.u; src = "override";
+  }else{
+    // 2) 아니면 STRICT 추정 시도
+    const sol = inferKU_STRICT([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi], f.sg);
+    if(!sol){
+      box.classList.add("bad");
+      box.style.display = "block";
+      box.innerHTML = `
+        <b>소숫점 계산 실패</b><br>
+        현재 S0/SG 조합으로는 STRICT 모드에서 k/u를 찾을 수 없습니다.<br>
+        (필요하다면 수동 오버라이드 후 다시 시도해 주세요.)
+      `;
+      return;
+    }
+    k = sol.k; u = sol.u; src = "strict-auto";
+  }
+
+  // 실제 값 계산
+  const S0real = computeS0RealFromKU(k, u);
+  const S0hp   = S0real.hp.toNumber();
+  const S0atk  = S0real.atk.toNumber();
+  const S0def  = S0real.def.toNumber();
+  const S0agi  = S0real.agi.toNumber();
+  // ★ 추가: 소숫점 S0를 입력칸에 자동 반영
+  $("s0_hp").value  = S0hp.toFixed(2);
+  $("s0_atk").value = S0atk.toFixed(2);
+  $("s0_def").value = S0def.toFixed(2);
+  $("s0_agi").value = S0agi.toFixed(2);
+
+  // S0이 바뀌었으니 일관성 검사 다시 실행
+  updateConsistency();
+  
+  const S0floor = {
+    hp: Math.floor(S0hp),
+    atk: Math.floor(S0atk),
+    def: Math.floor(S0def),
+    agi: Math.floor(S0agi),
+  };
+  const S0int = {
+    hp: Math.floor(f.s0.hp),
+    atk: Math.floor(f.s0.atk),
+    def: Math.floor(f.s0.def),
+    agi: Math.floor(f.s0.agi),
+  };
+  const okS0 =
+    S0floor.hp===S0int.hp &&
+    S0floor.atk===S0int.atk &&
+    S0floor.def===S0int.def &&
+    S0floor.agi===S0int.agi;
+
+  const SGreal = computeSGRealFromKU(u, f.sg);
+  const eVal   = SGreal.e.toNumber();
+
+  const r2 = x => new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber();
+  const SGhpR  = r2(SGreal.hp);
+  const SGatkR = r2(SGreal.atk);
+  const SGdefR = r2(SGreal.def);
+  const SGagiR = r2(SGreal.agi);
+
+  const diff = {
+    hp: r2(SGhpR  - f.sg.hp),
+    atk: r2(SGatkR - f.sg.atk),
+    def: r2(SGdefR - f.sg.def),
+    agi: r2(SGagiR - f.sg.agi),
+  };
+  const okSG = diff.hp===0 && diff.atk===0 && diff.def===0 && diff.agi===0;
+
+  const modeLabel =
+    src==="override" ? "오버라이드 k/u 사용"
+    : src==="strict-auto" ? "S0/SG로 STRICT 자동 추정"
+    : src;
+
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px">
+      <strong>소숫점 역산 결과</strong>
+      <span class="mono muted">${modeLabel}</span>
+    </div>
+
+    <div class="mono muted" style="margin-bottom:6px">
+      k=${k}, u=(${u.hp},${u.atk},${u.def},${u.agi}), e≈${eVal.toFixed(2)}
+    </div>
+
+    <div style="margin-bottom:4px"><b>S0 (레벨1 실제 값)</b></div>
+    <div class="note mono" style="margin-bottom:6px">
+      HP ${S0hp.toFixed(6)} / ATK ${S0atk.toFixed(6)} /
+      DEF ${S0def.toFixed(6)} / AGI ${S0agi.toFixed(6)}<br>
+      → floor 기준: (${S0floor.hp}/${S0floor.atk}/${S0floor.def}/${S0floor.agi}),
+      표기 S0 정수: (${S0int.hp}/${S0int.atk}/${S0int.def}/${S0int.agi})
+    </div>
+    <div class="${okS0?'ok':'bad'}">S0 정수 일치: <b>${okS0?'OK':'불일치'}</b></div>
+
+    <div style="margin-top:10px;margin-bottom:4px"><b>SG (성장치 실제 값)</b></div>
+    <div class="note mono" style="margin-bottom:6px">
+      HP ${SGreal.hp.toNumber().toFixed(6)} → 표기 ${SGhpR.toFixed(2)} (Δ${diff.hp>=0?'+':''}${diff.hp})<br>
+      ATK ${SGreal.atk.toNumber().toFixed(6)} → 표기 ${SGatkR.toFixed(2)} (Δ${diff.atk>=0?'+':''}${diff.atk})<br>
+      DEF ${SGreal.def.toNumber().toFixed(6)} → 표기 ${SGdefR.toFixed(2)} (Δ${diff.def>=0?'+':''}${diff.def})<br>
+      AGI ${SGreal.agi.toNumber().toFixed(6)} → 표기 ${SGagiR.toFixed(2)} (Δ${diff.agi>=0?'+':''}${diff.agi})
+    </div>
+    <div class="${okSG?'ok':'bad'}">SG 반올림 비교: <b>${okSG?'OK':'차이 있음'}</b></div>
+
+    <div class="note" style="margin-top:6px">
+      ※ 이 값들은 floor/반올림 되기 <b>직전</b>의 내부 실수 값을 보여 줍니다.<br>
+      ※ S0 불일치나 SG 오차가 크면, S0/SG 입력 또는 k/u 설정을 다시 한 번 확인해 주세요.
+    </div>
+  `;
+
+  box.classList.add(okS0 && okSG ? "ok" : "bad");
+  box.style.display = "block";
+}
+/* ★★★ [추가됨] 끝 ★★★ */
+
+
 /* ====== 이벤트 바인딩 ====== */
 $("btnReload").addEventListener("click", async ()=>{
   await loadRemote();
@@ -669,6 +862,7 @@ $("btnNew").addEventListener("click", ()=>{
   sortNames(); renderList(); loadForm(name);
 });
 searchEl.addEventListener("input", renderList);
+$("btnDecCalc").addEventListener("click", renderDecimalsPanel); // ★★★ [추가됨] 이벤트 리스너 ★★★
 
 // --- 신규: 페트 목록 필터 리스너 ---
 document.getElementById("filterChips").addEventListener("click", (e) => {
