@@ -132,20 +132,20 @@
   }
   .btn-admin:hover { background: var(--accent); color: #000; border-color: var(--accent); }
 
-  /* 대시보드 그리드 수정: align-items: stretch 적용 */
+  /* 대시보드 그리드: 높이 맞춤(stretch) */
   .dashboard {
     padding: 30px 30px 40px;
     max-width: 1400px; margin: 0 auto;
     width: 100%; display: grid; grid-template-columns: 3fr 2fr;
     gap: 24px; 
-    align-items: stretch; /* 높이 맞춤 */
+    align-items: stretch;
   }
 
   .panel {
     background: var(--card-bg); border-radius: var(--radius); border: var(--border);
     padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     display: flex; flex-direction: column;
-    height: 100%; /* 패널 자체도 100% 높이 사용 */
+    height: 100%;
   }
   .panel h2 {
     margin: 0 0 20px; font-size: 18px; font-family: var(--font-tech);
@@ -153,7 +153,7 @@
   }
   .panel h2::before { content:''; display:block; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
 
-  .notice-panel { grid-column: 1 / -1; padding: 20px 24px; height: auto; /* 공지사항은 자동 높이 */ }
+  .notice-panel { grid-column: 1 / -1; padding: 20px 24px; height: auto; }
   .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .notice-title { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
   .notice-title::before { content: 'ⓘ'; color: var(--accent); font-size: 20px; }
@@ -183,7 +183,7 @@
   .s-btn:active { background: rgba(255,255,255,0.2); color: var(--text-main); }
 
   .action-btns { 
-      display: flex; gap: 12px; margin-top: auto; /* 버튼을 하단으로 밀기 */
+      display: flex; gap: 12px; margin-top: auto; 
       padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); 
   }
   .btn-main {
@@ -273,7 +273,7 @@
     .mobile-menu-group { display: flex; }
     
     .dashboard { grid-template-columns: 1fr; padding: 15px; gap: 15px; }
-    .panel { padding: 20px; backdrop-filter: none; height: auto; /* 모바일은 높이 자동 */ }
+    .panel { padding: 20px; backdrop-filter: none; height: auto; }
   }
 
   #toastWrap {
@@ -481,11 +481,13 @@
 <div id="toastWrap"></div>
 
 <script>
+/* ========= 서버 경로 & 데이터 연결 (수정됨) ========= */
 const BASE_URL = "https://raw.githubusercontent.com/kkoby-daddy/kkoby-daddy.github.io/main/";
 const REMOTE_PETS_URL = BASE_URL + "data/pets.json";
 
+// Rank8 파일 경로: .full.json을 최우선으로 시도
 const R8_JSON_CANDIDATES = [
-  BASE_URL + "data/guaranteed_rank8.full.json",
+  BASE_URL + "data/guaranteed_rank8.full.json", 
   BASE_URL + "data/guaranteed_rank8.min.json",
   "data/guaranteed_rank8.full.json"
 ];
@@ -499,6 +501,8 @@ let R8MAP = {};
 
 function getJSONLS(key, fallback={}){ try{ return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback)); }catch{ return fallback; } }
 function setJSONLS(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+
+// Fetch 유틸 (캐시 방지 적용)
 async function fetchJSON(url){
     try {
         const r = await fetch(url+`?v=${Date.now()}`,{cache:"no-store"});
@@ -523,28 +527,32 @@ function getChosung(str){
   return out;
 }
 
+// 1. 데이터 로드 로직 (pets.json 우선)
 async function loadGlobalTable(){
   try{
     const obj = await fetchJSON(REMOTE_PETS_URL);
     if(typeof obj==="object" && !Array.isArray(obj)) {
         GLOBAL_TABLE = obj;
         setJSONLS(LS_TABLE, obj);
+        console.log("Loaded pets.json from Remote");
         finalizeLoad();
         return;
     }
   } catch(e){}
 
+  // 실패 시 로컬 캐시 시도
   try{
       const cached = getJSONLS(LS_TABLE, null);
       if(cached) {
           GLOBAL_TABLE = cached;
+          console.log("Loaded pets from Cache");
           finalizeLoad();
           showToast("오프라인 데이터(캐시)를 사용합니다.");
           return;
       }
   } catch(e){}
 
-  showToast("데이터를 불러오지 못했습니다. 네트워크를 확인하세요.");
+  showToast("데이터 불러오기 실패. 인터넷 연결을 확인하세요.");
   GLOBAL_TABLE = {};
   finalizeLoad();
 }
@@ -557,14 +565,22 @@ function finalizeLoad(){
     renderPetList();
 }
 
+// 2. Rank8 데이터 로드 로직 (full.json 우선)
 async function loadRank8Map(){
   for(const path of R8_JSON_CANDIDATES){
     try{
       const m = await fetchJSON(path);
-      if (typeof m==="object" && !Array.isArray(m)){ R8MAP = m; return; }
+      if (typeof m==="object" && !Array.isArray(m)){ 
+          R8MAP = m; 
+          console.log("Rank8 Loaded:", path);
+          // 데이터 로드 후 리스트 갱신하여 배지 표시
+          renderPetList();
+          return; 
+      }
     }catch{}
   }
   R8MAP = {};
+  console.log("Rank8 Data Failed");
 }
 
 const FAV_LS_KEY = "pet_favs_v1";
@@ -605,13 +621,21 @@ function showTip(text, target){
 }
 function hideTip(){ tipEl.classList.remove('show'); }
 
+// 3. 수정된 초성 표시 로직: 항상 표시
 function renderChosungTokens(){
   chosungTokens.innerHTML = "";
   const label = document.createElement('div');
   label.className = 'chip label'; label.textContent = "선택 :";
   chosungTokens.appendChild(label);
   
-  if(!currentChosung) return;
+  if(!currentChosung) {
+      // 선택된 게 없을 때 '전체' 표시
+      const all = document.createElement('div');
+      all.className = 'chip'; all.textContent = "전체";
+      chosungTokens.appendChild(all);
+      return;
+  }
+
   for(const ch of currentChosung){
     const t = document.createElement('div');
     t.className = 'chip active'; t.style.cursor = 'default'; t.textContent = ch;
@@ -670,9 +694,12 @@ function renderPetList() {
     item.className = 'pet-item';
     if(selectedName === n) item.classList.add('selected');
     
+    // 4. 100% 배지 로직 (항상 표시)
+    // 데이터 로드 시점 문제 해결을 위해 renderPetList를 데이터 로드 후 재호출함
     const r8 = R8MAP[n];
     let r8Badge = '';
     let r8Data = null;
+    // 배열이거나 객체일 경우 처리 (데이터 포맷 호환성)
     if (r8 && (Array.isArray(r8.obs_100_rank8) ? r8.obs_100_rank8.length : (r8.length||0))) {
         r8Badge = `<span class="badge-r8">100%</span>`;
         r8Data = Array.isArray(r8.obs_100_rank8) ? r8.obs_100_rank8 : r8;
@@ -956,6 +983,7 @@ overlay.addEventListener('click', closeSidebar);
 (async function init(){
     await loadGlobalTable();
     await loadRank8Map();
+    renderChosungTokens(); // 초기 호출 추가
 })();
 </script>
 </body>
