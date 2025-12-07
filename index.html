@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Happy 서버 페트 계산기</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
-<!-- 폰트: Noto Sans KR + Tech 느낌의 Orbit -->
+<!-- 폰트: Noto Sans KR + Orbit -->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Orbit&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* 테마 변수 - 꼬비아빠 놀이터 스타일 */
+    /* 테마 변수 */
     --bg-gradient: linear-gradient(135deg, #0f1115 0%, #1a1d26 100%);
     --sidebar-bg: rgba(22, 26, 34, 0.95);
     --main-bg: rgba(15, 17, 21, 0.6);
@@ -39,7 +39,7 @@
   /* --- 레이아웃 --- */
   .app-container { display: flex; height: 100%; width: 100vw; }
 
-  /* 1. 사이드바 */
+  /* 사이드바 */
   .sidebar {
     width: 380px;
     background: var(--sidebar-bg);
@@ -53,11 +53,12 @@
     font-family: var(--font-tech); font-size: 18px; font-weight: 700;
     color: var(--accent); margin-bottom: 4px; letter-spacing: 1px;
   }
-  .ver { font-size: 11px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center;}
-  .btn-admin {
-      background: rgba(255,255,255,0.1); border:none; color: var(--text-sub);
-      font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer;
+  .ver { 
+      font-size: 11px; color: var(--text-sub); 
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 4px;
   }
+  .credit { color: var(--text-sub); font-weight: 500; opacity: 0.8; }
 
   .search-area { padding: 15px 20px 5px; flex-shrink: 0; }
   .search-box { position: relative; margin-bottom: 10px; }
@@ -98,11 +99,15 @@
   .pet-name { font-weight: 500; font-size: 15px; }
   .item-right { display: flex; align-items: center; gap: 8px; }
   
-  .badge-r8 { font-size: 10px; background: rgba(16,185,129,0.2); color: var(--ok); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-r8 { 
+      font-size: 11px; background: rgba(16,185,129,0.2); color: var(--ok); 
+      padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.4); 
+      font-weight: 600; box-shadow: 0 0 8px rgba(16,185,129,0.2);
+  }
   .fav-icon { color: var(--text-sub); font-size: 18px; padding: 4px; }
   .fav-icon.active { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
 
-  /* 2. 메인 컨텐츠 */
+  /* 메인 컨텐츠 */
   .main-content {
     flex: 1; display: flex; flex-direction: column;
     background: var(--main-bg); overflow-y: auto; position: relative;
@@ -110,24 +115,37 @@
   }
   
   .top-nav {
-    display: none; justify-content: flex-start; align-items: center;
+    display: flex; justify-content: flex-end; align-items: center;
     padding: 15px 20px; z-index: 20; min-height: 60px;
     background: rgba(15, 17, 21, 0.8); backdrop-filter: blur(5px);
     position: sticky; top: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
   }
+  .mobile-menu-group { display: none; align-items: center; }
   .menu-toggle { font-size: 24px; color: var(--text-main); cursor: pointer; padding: 8px; margin: -8px; }
-  .menu-title-mobile { margin-left: 12px; font-weight: 700; font-size: 16px; color: var(--text-main); }
+  .menu-title-mobile { font-weight: 700; font-size: 16px; color: var(--text-main); margin-left: 10px; }
 
+  .btn-admin {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+      color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; 
+      cursor: pointer; transition: all 0.2s; font-weight: 600;
+  }
+  .btn-admin:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* 대시보드 그리드 수정: align-items: stretch 적용 */
   .dashboard {
-    padding: 70px 30px 40px; max-width: 1400px; margin: 0 auto;
+    padding: 30px 30px 40px;
+    max-width: 1400px; margin: 0 auto;
     width: 100%; display: grid; grid-template-columns: 3fr 2fr;
-    gap: 24px; align-items: start;
+    gap: 24px; 
+    align-items: stretch; /* 높이 맞춤 */
   }
 
   .panel {
     background: var(--card-bg); border-radius: var(--radius); border: var(--border);
     padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     display: flex; flex-direction: column;
+    height: 100%; /* 패널 자체도 100% 높이 사용 */
   }
   .panel h2 {
     margin: 0 0 20px; font-size: 18px; font-family: var(--font-tech);
@@ -135,7 +153,7 @@
   }
   .panel h2::before { content:''; display:block; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
 
-  .notice-panel { grid-column: 1 / -1; padding: 20px 24px; }
+  .notice-panel { grid-column: 1 / -1; padding: 20px 24px; height: auto; /* 공지사항은 자동 높이 */ }
   .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .notice-title { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
   .notice-title::before { content: 'ⓘ'; color: var(--accent); font-size: 20px; }
@@ -164,7 +182,10 @@
   }
   .s-btn:active { background: rgba(255,255,255,0.2); color: var(--text-main); }
 
-  .action-btns { display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .action-btns { 
+      display: flex; gap: 12px; margin-top: auto; /* 버튼을 하단으로 밀기 */
+      padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); 
+  }
   .btn-main {
     flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: 700; 
     cursor: pointer; font-size: 16px; transition: 0.2s;
@@ -247,9 +268,12 @@
     }
     .sidebar-overlay.active { display: block; opacity: 1; }
     .main-content { overflow: visible; height: auto; }
-    .top-nav { display: flex; }
+    
+    .top-nav { justify-content: space-between; }
+    .mobile-menu-group { display: flex; }
+    
     .dashboard { grid-template-columns: 1fr; padding: 15px; gap: 15px; }
-    .panel { padding: 20px; backdrop-filter: none; }
+    .panel { padding: 20px; backdrop-filter: none; height: auto; /* 모바일은 높이 자동 */ }
   }
 
   #toastWrap {
@@ -278,7 +302,8 @@
       </div>
       <div class="ver">
         <span>v25.11.10</span>
-        <button id="btnAdmin" class="btn-admin">ADMIN</button>
+        <!-- 크레딧 -->
+        <span class="credit">Data by. 꼬비아빠</span>
       </div>
     </div>
     
@@ -296,14 +321,21 @@
        <div id="favChips" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
     </div>
 
-    <div class="pet-list" id="petList"></div>
+    <div class="pet-list" id="petList">
+        <div style="text-align:center; padding:20px; color:var(--text-sub);">데이터 로딩 중...</div>
+    </div>
   </aside>
 
   <!-- 2. 메인 컨텐츠 -->
   <main class="main-content">
     <nav class="top-nav">
-      <div class="menu-toggle" id="openSidebarBtn">☰</div>
-      <div class="menu-title-mobile">Happy Server</div>
+      <!-- 모바일 햄버거 메뉴 -->
+      <div class="mobile-menu-group">
+          <div class="menu-toggle" id="openSidebarBtn">☰</div>
+          <div class="menu-title-mobile">Happy Server</div>
+      </div>
+      <!-- 우측 상단 Admin 버튼 -->
+      <button id="btnAdmin" class="btn-admin">ADMIN</button>
     </nav>
 
     <div class="dashboard">
@@ -449,32 +481,34 @@
 <div id="toastWrap"></div>
 
 <script>
-/* ========= 서버 경로 & Happy 데이터 로직 ========= */
-const LOCAL_PETS = "data/pets.json";
-const GH_OWNER  = "kkoby-daddy";
-const GH_REPO   = "kkoby-daddy.github.io";
-const GH_BRANCH = "main";
-const PETS_PATH = "data/pets.json";
-const REMOTE_PETS = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${PETS_PATH}`;
+const BASE_URL = "https://raw.githubusercontent.com/kkoby-daddy/kkoby-daddy.github.io/main/";
+const REMOTE_PETS_URL = BASE_URL + "data/pets.json";
 
 const R8_JSON_CANDIDATES = [
-  "data/guaranteed_rank8.full.json",
-  "data/guaranteed_rank8.min.json",
-  "guaranteed_rank8.sample8.json"
+  BASE_URL + "data/guaranteed_rank8.full.json",
+  BASE_URL + "data/guaranteed_rank8.min.json",
+  "data/guaranteed_rank8.full.json"
 ];
 
 const LS_TABLE = "HappyPetTable_cache";
 const TOTAL = 178750;
-const ADMIN_PASS = "kkoby-daddy";
 
 let GLOBAL_TABLE = {};
 let ALL_NAMES = [];
 let R8MAP = {};
 
-/* 유틸 */
 function getJSONLS(key, fallback={}){ try{ return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback)); }catch{ return fallback; } }
 function setJSONLS(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
-function fetchJSON(url){ return fetch(url+`?v=${Date.now()}`,{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.json();}); }
+async function fetchJSON(url){
+    try {
+        const r = await fetch(url+`?v=${Date.now()}`,{cache:"no-store"});
+        if(!r.ok) throw new Error(r.status);
+        return await r.json();
+    } catch(e) {
+        console.warn("Fetch failed for:", url);
+        throw e;
+    }
+}
 
 const CHO_CODE = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 const CHO_SIMPLE = (c)=>({"ㄲ":"ㄱ","ㄸ":"ㄷ","ㅃ":"ㅂ","ㅆ":"ㅅ","ㅉ":"ㅈ"}[c]||c);
@@ -489,25 +523,40 @@ function getChosung(str){
   return out;
 }
 
-/* 데이터 로딩 */
 async function loadGlobalTable(){
   try{
-    const obj = await fetchJSON(REMOTE_PETS);
-    if(typeof obj!=="object" || Array.isArray(obj)) throw 0;
-    GLOBAL_TABLE = obj; setJSONLS(LS_TABLE, obj);
-  }catch{
-    try{
-      const obj = await fetchJSON(LOCAL_PETS);
-      if(typeof obj!=="object" || Array.isArray(obj)) throw 0;
-      GLOBAL_TABLE = obj; setJSONLS(LS_TABLE, obj);
-    }catch{
-      GLOBAL_TABLE = getJSONLS(LS_TABLE, {});
+    const obj = await fetchJSON(REMOTE_PETS_URL);
+    if(typeof obj==="object" && !Array.isArray(obj)) {
+        GLOBAL_TABLE = obj;
+        setJSONLS(LS_TABLE, obj);
+        finalizeLoad();
+        return;
     }
-  }
-  ALL_NAMES = Object.keys(GLOBAL_TABLE).sort((a,b)=>a.localeCompare(b,'ko'));
-  FAVS = loadFavs().filter(n => GLOBAL_TABLE[n]);
-  saveFavs(); renderFavChips();
+  } catch(e){}
+
+  try{
+      const cached = getJSONLS(LS_TABLE, null);
+      if(cached) {
+          GLOBAL_TABLE = cached;
+          finalizeLoad();
+          showToast("오프라인 데이터(캐시)를 사용합니다.");
+          return;
+      }
+  } catch(e){}
+
+  showToast("데이터를 불러오지 못했습니다. 네트워크를 확인하세요.");
+  GLOBAL_TABLE = {};
+  finalizeLoad();
 }
+
+function finalizeLoad(){
+    ALL_NAMES = Object.keys(GLOBAL_TABLE).sort((a,b)=>a.localeCompare(b,'ko'));
+    FAVS = loadFavs().filter(n => GLOBAL_TABLE[n]);
+    saveFavs(); 
+    renderFavChips();
+    renderPetList();
+}
+
 async function loadRank8Map(){
   for(const path of R8_JSON_CANDIDATES){
     try{
@@ -518,7 +567,6 @@ async function loadRank8Map(){
   R8MAP = {};
 }
 
-/* ========= 즐겨찾기 로직 ========= */
 const FAV_LS_KEY = "pet_favs_v1";
 let FAVS = [];
 function loadFavs(){ try{ return JSON.parse(localStorage.getItem(FAV_LS_KEY)||"[]"); }catch{return[];} }
@@ -535,28 +583,23 @@ function removeFav(name){
   if(i>=0){ FAVS.splice(i,1); saveFavs(); renderFavChips(); renderPetList(); showToast("즐겨찾기 해제됨"); }
 }
 
-/* ========= UI 로직 ========= */
 const petListEl = document.getElementById('petList');
 const searchInput = document.getElementById('petSearch');
 let selectedName = null;
 let currentChosung = "";
-
 const chosungContainer = document.getElementById('chosung');
 const chosungTokens = document.getElementById('chosungTokens');
 const CHO_BUTTONS = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 
-/* 툴팁 로직 */
 const tipEl = document.getElementById('floatingTip');
 function showTip(text, target){
   if(!text) return;
   const rect = target.getBoundingClientRect();
   tipEl.innerHTML = text.replace(/\n/g, '<br>');
   tipEl.classList.add('show');
-  
   const tw = tipEl.offsetWidth;
   const left = Math.min(window.innerWidth - tw - 10, Math.max(10, rect.left + rect.width/2 - tw/2));
   const top = rect.top - tipEl.offsetHeight - 10;
-  
   tipEl.style.left = left + 'px';
   tipEl.style.top = (top < 0 ? rect.bottom + 10 : top) + 'px';
 }
@@ -565,8 +608,7 @@ function hideTip(){ tipEl.classList.remove('show'); }
 function renderChosungTokens(){
   chosungTokens.innerHTML = "";
   const label = document.createElement('div');
-  label.className = 'chip label';
-  label.textContent = "선택 :";
+  label.className = 'chip label'; label.textContent = "선택 :";
   chosungTokens.appendChild(label);
   
   if(!currentChosung) return;
@@ -618,7 +660,8 @@ function renderPetList() {
 
   petListEl.innerHTML = "";
   if(list.length === 0) {
-    petListEl.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:20px;">검색 결과 없음</div>';
+    if(Object.keys(GLOBAL_TABLE).length === 0) petListEl.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:20px;">데이터를 불러오는 중...<br>(또는 실패)</div>';
+    else petListEl.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:20px;">검색 결과 없음</div>';
     return;
   }
 
@@ -627,7 +670,6 @@ function renderPetList() {
     item.className = 'pet-item';
     if(selectedName === n) item.classList.add('selected');
     
-    // R8 Check (Happy Server Feature)
     const r8 = R8MAP[n];
     let r8Badge = '';
     let r8Data = null;
@@ -644,7 +686,6 @@ function renderPetList() {
       </div>
     `;
 
-    // Events
     const star = item.querySelector('.fav-icon');
     star.onclick = (e) => { e.stopPropagation(); toggleFav(n); };
     
@@ -656,7 +697,6 @@ function renderPetList() {
         badge.onmouseenter = () => showTip(tipText, badge);
         badge.onmouseleave = hideTip;
     }
-
     item.onclick = () => { selectPet(n); closeSidebar(); };
     petListEl.appendChild(item);
   });
@@ -670,12 +710,11 @@ function selectPet(name) {
   document.getElementById('selectedPetTitle').textContent = name;
   
   if(row && row.s0) {
-    document.getElementById('s0_hp').value = row.s0.hp;
-    document.getElementById('s0_atk').value = row.s0.atk;
-    document.getElementById('s0_def').value = row.s0.def;
-    document.getElementById('s0_agi').value = row.s0.agi;
+    document.getElementById('s0_hp').value = Number(row.s0.hp).toFixed(2);
+    document.getElementById('s0_atk').value = Number(row.s0.atk).toFixed(2);
+    document.getElementById('s0_def').value = Number(row.s0.def).toFixed(2);
+    document.getElementById('s0_agi').value = Number(row.s0.agi).toFixed(2);
     
-    // 관측치 초기값 (소수점 제거)
     document.getElementById('obs_hp').value = Math.floor(row.s0.hp);
     document.getElementById('obs_atk').value = Math.floor(row.s0.atk);
     document.getElementById('obs_def').value = Math.floor(row.s0.def);
@@ -686,18 +725,16 @@ function selectPet(name) {
   }
 
   if(row && row.sg) {
-    document.getElementById('sg_hp').value = row.sg.hp;
-    document.getElementById('sg_atk').value = row.sg.atk;
-    document.getElementById('sg_def').value = row.sg.def;
-    document.getElementById('sg_agi').value = row.sg.agi;
+    document.getElementById('sg_hp').value = Number(row.sg.hp).toFixed(2);
+    document.getElementById('sg_atk').value = Number(row.sg.atk).toFixed(2);
+    document.getElementById('sg_def').value = Number(row.sg.def).toFixed(2);
+    document.getElementById('sg_agi').value = Number(row.sg.agi).toFixed(2);
   }
   
   resetResult();
 }
 
-/* ========= Happy Server Calculation Logic (From Index.html) ========= */
 const ESET = Array.from({length: ((575-435)/5)+1 }, (_,i) => 575 - i*5);
-
 function solveUFromSG_JJYAL(SG, e){
   try{
     if(!SG || ![SG.hp,SG.atk,SG.def,SG.agi].every(Number.isFinite)) return null;
@@ -764,7 +801,6 @@ function enumerate_jjyal(pku, obs){
                 const iD=new Decimal(u.def+dr+db).times(fac);
                 const iG=new Decimal(u.agi+gr+gb).times(fac);
                 const iH=new Decimal(u.hp+hr+hb).times(fac);
-                
                 if( iH.times(0.1).plus(iA).plus(iD.times(0.1)).plus(iG.times(0.05)).floor().toNumber() === obs[1] &&
                     iH.times(0.1).plus(iA.times(0.1)).plus(iD).plus(iG.times(0.05)).floor().toNumber() === obs[2] &&
                     iG.floor().toNumber() === obs[3] &&
@@ -781,7 +817,6 @@ function enumerate_jjyal(pku, obs){
   return {matches, rank8, dist};
 }
 
-/* ========= Interaction & Results ========= */
 document.getElementById('btnCalc').addEventListener('click', () => {
   if(!selectedName) { showToast("페트를 목록에서 선택해주세요!"); openSidebar(); return; }
   const obs=[obshp,obsatk,obsdef,obsagi].map(e=>parseInt(e.value,10));
@@ -828,7 +863,6 @@ function renderResult(res) {
     const appear = matches/TOTAL*100;
     const tries = successPct > 0 ? (100/successPct) : Infinity;
 
-    // Rings Animation
     setTimeout(() => {
         document.getElementById('ringSuccess').style.strokeDasharray = `${Math.min(successPct, 100).toFixed(1)}, 100`;
         const tryGauge = Math.min((tries / 200) * 100, 100);
@@ -843,11 +877,7 @@ function renderResult(res) {
     document.getElementById('totMatches').textContent = matches.toLocaleString();
     document.getElementById('rank8Matches').textContent = rank8.toLocaleString();
 
-    // Table
-    const entries = Object.entries(res.dist)
-      .map(([r,c]) => ({r:parseInt(r), c}))
-      .sort((a,b) => b.r - a.r);
-
+    const entries = Object.entries(res.dist).map(([r,c]) => ({r:parseInt(r), c})).sort((a,b) => b.r - a.r);
     if(entries.length === 0) {
         document.getElementById('dist').innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">일치하는 결과가 없습니다.</div>`;
         return;
@@ -858,23 +888,15 @@ function renderResult(res) {
     const count8 = grade8 ? grade8.c : 0;
     const pct8 = matches ? (count8/matches*100).toFixed(2) : "0.00";
     
-    html += `
-    <div class="rank8-card">
-      <div class="rank8-label">8등급 <span class="rank8-sub">(MAX)</span></div>
-      <div class="rank8-value">${count8.toLocaleString()}개 <span style="font-size:14px; opacity:0.7">(${pct8}%)</span></div>
-    </div>`;
+    html += `<div class="rank8-card"><div class="rank8-label">8등급 <span class="rank8-sub">(MAX)</span></div><div class="rank8-value">${count8.toLocaleString()}개 <span style="font-size:14px; opacity:0.7">(${pct8}%)</span></div></div>`;
 
     const otherGrades = entries.filter(e => e.r !== 8);
     if(otherGrades.length > 0) {
       html += `<button class="toggle-details-btn" onclick="toggleDetails(this)">▼ 나머지 등급 보기 (${otherGrades.length}종)</button>`;
-      html += `<div class="hidden-details" id="hiddenDetails">
-        <table class="detail-table" style="margin-top:10px;">
-        <thead><tr><th>등급</th><th>개수</th><th>확률</th></tr></thead>
-        <tbody>`;
+      html += `<div class="hidden-details" id="hiddenDetails"><table class="detail-table" style="margin-top:10px;"><thead><tr><th>등급</th><th>개수</th><th>확률</th></tr></thead><tbody>`;
       otherGrades.forEach(e => {
         const pct = (e.c/matches*100).toFixed(2);
-        let badgeClass = "rank-badge";
-        if(e.r >= 5) badgeClass += " a";
+        let badgeClass = "rank-badge"; if(e.r >= 5) badgeClass += " a";
         html += `<tr><td><span class="${badgeClass}">${e.r}등급</span></td><td>${e.c.toLocaleString()}</td><td>${pct}%</td></tr>`;
       });
       html += `</tbody></table></div>`;
@@ -916,7 +938,6 @@ document.addEventListener('click', (e) => {
 });
 document.getElementById('btnAdmin').addEventListener('click', ()=>location.href="./admin.html");
 
-/* Sidebar Control */
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
 const closeBtn = document.getElementById('closeSidebarBtn');
@@ -935,7 +956,6 @@ overlay.addEventListener('click', closeSidebar);
 (async function init(){
     await loadGlobalTable();
     await loadRank8Map();
-    renderPetList(); renderChosungTokens();
 })();
 </script>
 </body>
