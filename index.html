@@ -481,15 +481,25 @@
 <div id="toastWrap"></div>
 
 <script>
-/* ========= 서버 경로 & 데이터 연결 (수정됨) ========= */
-const BASE_URL = "https://raw.githubusercontent.com/kkoby-daddy/kkoby-daddy.github.io/main/";
-const REMOTE_PETS_URL = BASE_URL + "data/pets.json";
+/* ========= 서버 경로 & 데이터 연결 (Robust Fix) ========= */
+// 기존 index.html의 로직을 그대로 가져와 안정성을 확보합니다.
+const GH_OWNER  = "kkoby-daddy";
+const GH_REPO   = "kkoby-daddy.github.io";
+const GH_BRANCH = "main";
+const DATA_DIR  = "data/";
 
-// Rank8 파일 경로: .full.json을 최우선으로 시도
+// 1. Raw GitHub Paths (원격)
+const REMOTE_BASE = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/`;
+const REMOTE_PETS = REMOTE_BASE + DATA_DIR + "pets.json";
+
+// 2. Relative Paths (로컬/동일 도메인 호스팅용 Fallback)
+const LOCAL_PETS  = DATA_DIR + "pets.json";
+
+// Rank8 Candidates: 로컬(상대 경로)을 1순위로 하여 호스팅 환경에서 즉시 로드되도록 변경
 const R8_JSON_CANDIDATES = [
-  BASE_URL + "data/guaranteed_rank8.full.json", 
-  BASE_URL + "data/guaranteed_rank8.min.json",
-  "data/guaranteed_rank8.full.json"
+  DATA_DIR + "guaranteed_rank8.full.json",          // 1순위: 상대 경로 (가장 빠르고 안전)
+  REMOTE_BASE + DATA_DIR + "guaranteed_rank8.full.json", // 2순위: 원격 Raw
+  DATA_DIR + "guaranteed_rank8.min.json"
 ];
 
 const LS_TABLE = "HappyPetTable_cache";
@@ -509,7 +519,6 @@ async function fetchJSON(url){
         if(!r.ok) throw new Error(r.status);
         return await r.json();
     } catch(e) {
-        console.warn("Fetch failed for:", url);
         throw e;
     }
 }
@@ -527,60 +536,52 @@ function getChosung(str){
   return out;
 }
 
-// 1. 데이터 로드 로직 (pets.json 우선)
+// 1. 데이터 로드 로직 (3단계 Fallback 구조 복원)
 async function loadGlobalTable(){
   try{
-    const obj = await fetchJSON(REMOTE_PETS_URL);
-    if(typeof obj==="object" && !Array.isArray(obj)) {
-        GLOBAL_TABLE = obj;
-        setJSONLS(LS_TABLE, obj);
-        console.log("Loaded pets.json from Remote");
-        finalizeLoad();
-        return;
+    // 1차: 원격 Raw 시도
+    const obj = await fetchJSON(REMOTE_PETS);
+    if(typeof obj!=="object" || Array.isArray(obj)) throw 0;
+    GLOBAL_TABLE = obj; setJSONLS(LS_TABLE, obj);
+    console.log("[Data] Loaded from Remote Raw");
+  }catch(e1){
+    try{
+      // 2차: 로컬 상대 경로 시도 (GitHub Pages 등에서 필수)
+      console.warn("[Data] Remote failed, trying local relative path...");
+      const obj = await fetchJSON(LOCAL_PETS);
+      if(typeof obj!=="object" || Array.isArray(obj)) throw 0;
+      GLOBAL_TABLE = obj; setJSONLS(LS_TABLE, obj);
+      console.log("[Data] Loaded from Local Relative");
+    }catch(e2){
+      // 3차: 로컬스토리지 캐시
+      GLOBAL_TABLE = getJSONLS(LS_TABLE, {});
+      console.warn("[Data] All fetch failed -> Using LocalStorage Cache");
+      showToast("오프라인 데이터(캐시)를 사용합니다.");
     }
-  } catch(e){}
+  }
 
-  // 실패 시 로컬 캐시 시도
-  try{
-      const cached = getJSONLS(LS_TABLE, null);
-      if(cached) {
-          GLOBAL_TABLE = cached;
-          console.log("Loaded pets from Cache");
-          finalizeLoad();
-          showToast("오프라인 데이터(캐시)를 사용합니다.");
-          return;
-      }
-  } catch(e){}
-
-  showToast("데이터 불러오기 실패. 인터넷 연결을 확인하세요.");
-  GLOBAL_TABLE = {};
-  finalizeLoad();
+  ALL_NAMES = Object.keys(GLOBAL_TABLE).sort((a,b)=>a.localeCompare(b,'ko'));
+  FAVS = loadFavs().filter(n => GLOBAL_TABLE[n]);
+  saveFavs(); 
+  renderFavChips();
+  renderPetList();
 }
 
-function finalizeLoad(){
-    ALL_NAMES = Object.keys(GLOBAL_TABLE).sort((a,b)=>a.localeCompare(b,'ko'));
-    FAVS = loadFavs().filter(n => GLOBAL_TABLE[n]);
-    saveFavs(); 
-    renderFavChips();
-    renderPetList();
-}
-
-// 2. Rank8 데이터 로드 로직 (full.json 우선)
+// 2. Rank8 데이터 로드 로직 (다중 후보군 순차 시도)
 async function loadRank8Map(){
   for(const path of R8_JSON_CANDIDATES){
     try{
       const m = await fetchJSON(path);
       if (typeof m==="object" && !Array.isArray(m)){ 
           R8MAP = m; 
-          console.log("Rank8 Loaded:", path);
-          // 데이터 로드 후 리스트 갱신하여 배지 표시
-          renderPetList();
+          console.log("[Rank8] Loaded:", path);
+          renderPetList(); // 로드 성공 시 리스트 갱신
           return; 
       }
     }catch{}
   }
   R8MAP = {};
-  console.log("Rank8 Data Failed");
+  console.log("[Rank8] Data Failed (All candidates)");
 }
 
 const FAV_LS_KEY = "pet_favs_v1";
@@ -694,8 +695,7 @@ function renderPetList() {
     item.className = 'pet-item';
     if(selectedName === n) item.classList.add('selected');
     
-    // 4. 100% 배지 로직 (항상 표시)
-    // 데이터 로드 시점 문제 해결을 위해 renderPetList를 데이터 로드 후 재호출함
+    // 4. 100% 배지 로직
     const r8 = R8MAP[n];
     let r8Badge = '';
     let r8Data = null;
@@ -983,7 +983,7 @@ overlay.addEventListener('click', closeSidebar);
 (async function init(){
     await loadGlobalTable();
     await loadRank8Map();
-    renderChosungTokens(); // 초기 호출 추가
+    renderChosungTokens();
 })();
 </script>
 </body>
