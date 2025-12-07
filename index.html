@@ -710,6 +710,9 @@ function renderPetList() {
         const tipText = `8등급 보장 초기치\n${preview}${more}`;
         badge.setAttribute('data-tip', tipText);
         
+        // [수정] 모바일 터치 시 부모(행) 클릭 이벤트(사이드바 닫힘) 방지
+        badge.addEventListener('click', (e) => { e.stopPropagation(); });
+        
         rightDiv.appendChild(badge);
     }
     
