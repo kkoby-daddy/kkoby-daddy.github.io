@@ -161,7 +161,8 @@
   .admin-btn:hover { color: var(--accent); transform: scale(1.1); text-shadow: 0 0 8px var(--accent); }
 
   .dashboard {
-    padding: 80px 30px 40px; max-width: 1400px; margin: 0 auto;
+    padding: 70px 30px 40px; /* 수정됨: 80px -> 70px (1번과 동일) */
+    max-width: 1400px; margin: 0 auto;
     width: 100%; display: grid; grid-template-columns: 3fr 2fr; gap: 24px;
     align-items: stretch;
   }
@@ -170,6 +171,7 @@
     background: var(--card-bg); border-radius: var(--radius);
     border: var(--border); padding: 24px; backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; flex-direction: column; height: auto;
+    min-height: 580px; /* 수정됨: 최소 높이 추가 (1번과 동일하게 패널 높이 맞춤) */
   }
   .panel h2 {
     margin: 0 0 20px; font-size: 18px; font-family: var(--font-tech);
@@ -177,11 +179,19 @@
   }
   .panel h2::before { content:''; display:block; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
 
-  .notice-panel { grid-column: 1 / -1; padding: 20px 24px; min-height: auto; }
+  .notice-panel { 
+    grid-column: 1 / -1; padding: 20px 24px; 
+    min-height: auto; /* 안내사항은 높이 자동 */
+  }
   .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .notice-title { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
   .notice-title::before { content: 'ⓘ'; color: var(--accent); font-size: 20px; }
-  .notice-content { padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; line-height: 1.6; color: var(--text-sub); }
+  
+  /* 수정됨: 폰트 크기 및 줄간격 1번과 동일하게 변경 */
+  .notice-content { 
+    padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); 
+    font-size: 16px; line-height: 1.8; color: var(--text-sub); 
+  }
 
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
   .stat-col label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 6px; text-align: center; }
@@ -285,7 +295,10 @@
     .menu-toggle { display: block; } /* 모바일에서 햄버거 메뉴 보임 */
     
     .dashboard { grid-template-columns: 1fr; padding: 60px 15px 15px; gap: 15px; } /* 상단 패딩 조정 */
-    .panel { padding: 20px; backdrop-filter: none; }
+    
+    /* 수정됨: 모바일에서는 패널 높이 자동 */
+    .panel { padding: 20px; backdrop-filter: none; min-height: auto; }
+    
     .notice-panel { padding: 15px 20px; }
     
     /* 모바일 네비게이션 조정 */
@@ -327,8 +340,8 @@
         <div class="menu-toggle" id="closeSidebarBtn" style="font-size:20px; display:none;">✕</div>
       </div>
       <div class="ver">
-        <span>Date : 25.11.10</span>
-        <span>Data by 꼬비아빠</span>
+        <span>Date : 2025.11.10</span>
+        <span>Data by. 꼬비아빠</span>
       </div>
     </div>
     
