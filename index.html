@@ -161,7 +161,7 @@
   .admin-btn:hover { color: var(--accent); transform: scale(1.1); text-shadow: 0 0 8px var(--accent); }
 
   .dashboard {
-    padding: 70px 30px 40px; /* 수정됨: 80px -> 70px (1번과 동일) */
+    padding: 70px 30px 40px;
     max-width: 1400px; margin: 0 auto;
     width: 100%; display: grid; grid-template-columns: 3fr 2fr; gap: 24px;
     align-items: stretch;
@@ -171,7 +171,7 @@
     background: var(--card-bg); border-radius: var(--radius);
     border: var(--border); padding: 24px; backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; flex-direction: column; height: auto;
-    min-height: 580px; /* 수정됨: 최소 높이 추가 (1번과 동일하게 패널 높이 맞춤) */
+    min-height: 580px;
   }
   .panel h2 {
     margin: 0 0 20px; font-size: 18px; font-family: var(--font-tech);
@@ -181,13 +181,12 @@
 
   .notice-panel { 
     grid-column: 1 / -1; padding: 20px 24px; 
-    min-height: auto; /* 안내사항은 높이 자동 */
+    min-height: auto;
   }
   .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .notice-title { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
   .notice-title::before { content: 'ⓘ'; color: var(--accent); font-size: 20px; }
   
-  /* 수정됨: 폰트 크기 및 줄간격 1번과 동일하게 변경 */
   .notice-content { 
     padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); 
     font-size: 16px; line-height: 1.8; color: var(--text-sub); 
@@ -292,16 +291,14 @@
     .sidebar-overlay.active { display: block; opacity: 1; }
     
     .main-content { overflow: visible; height: auto; }
-    .menu-toggle { display: block; } /* 모바일에서 햄버거 메뉴 보임 */
+    .menu-toggle { display: block; }
     
-    .dashboard { grid-template-columns: 1fr; padding: 60px 15px 15px; gap: 15px; } /* 상단 패딩 조정 */
+    .dashboard { grid-template-columns: 1fr; padding: 60px 15px 15px; gap: 15px; }
     
-    /* 수정됨: 모바일에서는 패널 높이 자동 */
     .panel { padding: 20px; backdrop-filter: none; min-height: auto; }
     
     .notice-panel { padding: 15px 20px; }
     
-    /* 모바일 네비게이션 조정 */
     .top-nav { position: fixed; justify-content: space-between; padding: 10px 15px; background: rgba(15,17,21,0.95); pointer-events: auto; }
     .nav-controls { background: transparent; border: none; padding: 0; }
     .menu-title-mobile { display: block; font-weight: 700; color: var(--accent); }
@@ -325,10 +322,7 @@
 </head>
 <body>
 
-<!-- 툴팁 엘리먼트 -->
 <div class="floating-tip" id="floatingTip"></div>
-
-<!-- 모바일 사이드바 배경 오버레이 -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="app-container">
@@ -340,7 +334,7 @@
         <div class="menu-toggle" id="closeSidebarBtn" style="font-size:20px; display:none;">✕</div>
       </div>
       <div class="ver">
-        <span>Date : 2026.02.11</span>
+        <span>Date : 2026.02.13</span>
         <span>Data by. 꼬비아빠</span>
       </div>
     </div>
@@ -364,7 +358,7 @@
 
   <!-- 2. 메인 컨텐츠 -->
   <main class="main-content">
-    <!-- 우측 상단 네비게이션 (Admin, 메뉴) -->
+    <!-- 우측 상단 네비게이션 -->
     <nav class="top-nav">
       <div class="menu-title-mobile">꼬비아빠 놀이터</div>
       <div class="nav-controls">
@@ -391,27 +385,29 @@
       <section class="panel">
         <h2><span id="selectedPetTitle">페트를 선택해주세요</span></h2>
         
+        <!-- S급 기준 (초기치 / 성장률) -->
         <div class="input-group-title">S급 기준 (초기치 / 성장률)</div>
         <div class="stat-grid">
           <div class="stat-col">
             <label>내구력</label>
-            <div class="stat-box readonly"><input type="number" id="s0_hp" readonly placeholder="-"></div>
-            <div class="stat-box readonly" style="margin-top:6px"><input type="number" id="sg_hp" readonly placeholder="-"></div>
+            <!-- 브라우저에 따라 ".00"이 생략되는 것을 방지하기 위해 type="text" 적용 -->
+            <div class="stat-box readonly"><input type="text" id="s0_hp" readonly placeholder="-"></div>
+            <div class="stat-box readonly" style="margin-top:6px"><input type="text" id="sg_hp" readonly placeholder="-"></div>
           </div>
           <div class="stat-col">
             <label>공격력</label>
-            <div class="stat-box readonly"><input type="number" id="s0_atk" readonly placeholder="-"></div>
-            <div class="stat-box readonly" style="margin-top:6px"><input type="number" id="sg_atk" readonly placeholder="-"></div>
+            <div class="stat-box readonly"><input type="text" id="s0_atk" readonly placeholder="-"></div>
+            <div class="stat-box readonly" style="margin-top:6px"><input type="text" id="sg_atk" readonly placeholder="-"></div>
           </div>
           <div class="stat-col">
             <label>방어력</label>
-            <div class="stat-box readonly"><input type="number" id="s0_def" readonly placeholder="-"></div>
-            <div class="stat-box readonly" style="margin-top:6px"><input type="number" id="sg_def" readonly placeholder="-"></div>
+            <div class="stat-box readonly"><input type="text" id="s0_def" readonly placeholder="-"></div>
+            <div class="stat-box readonly" style="margin-top:6px"><input type="text" id="sg_def" readonly placeholder="-"></div>
           </div>
           <div class="stat-col">
             <label>순발력</label>
-            <div class="stat-box readonly"><input type="number" id="s0_agi" readonly placeholder="-"></div>
-            <div class="stat-box readonly" style="margin-top:6px"><input type="number" id="sg_agi" readonly placeholder="-"></div>
+            <div class="stat-box readonly"><input type="text" id="s0_agi" readonly placeholder="-"></div>
+            <div class="stat-box readonly" style="margin-top:6px"><input type="text" id="sg_agi" readonly placeholder="-"></div>
           </div>
         </div>
 
@@ -514,7 +510,7 @@
 <div id="toastWrap"></div>
 
 <script>
-/* ========= 1번 파일의 로직 (Data & Logic) ========= */
+/* ========= 데이터 로딩 & 유틸 ========= */
 const LOCAL_PETS = "data/pets.json";
 const GH_OWNER  = "kkoby-daddy";
 const GH_REPO   = "kkoby-daddy.github.io";
@@ -535,7 +531,6 @@ let ALL_NAMES = [];
 let R8MAP = {};
 let FAVS = [];
 
-/* 유틸리티 */
 function getJSONLS(key, fallback={}){ try{ return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback)); }catch{ return fallback; } }
 function setJSONLS(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
 function fetchJSON(url){ return fetch(url+`?v=${Date.now()}`,{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.json();}); }
@@ -547,7 +542,6 @@ function showToast(msg){
   setTimeout(()=>{ t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; setTimeout(()=>t.remove(), 300); }, 2000);
 }
 
-/* 데이터 로딩 */
 async function loadGlobalTable(){
   try{
     const obj = await fetchJSON(REMOTE_PETS);
@@ -578,13 +572,11 @@ async function loadRank8Map(){
   R8MAP = {};
 }
 
-/* 즐겨찾기 */
 function loadFavs(){ try{ const arr = JSON.parse(localStorage.getItem(FAV_LS_KEY)||"[]"); return Array.isArray(arr) ? arr.slice(0,5) : []; }catch{ return []; } }
 function saveFavs(){ localStorage.setItem(FAV_LS_KEY, JSON.stringify(FAVS)); }
 function isFav(name){ return FAVS.includes(name); }
 function toggleFav(n){ if(isFav(n)) FAVS = FAVS.filter(x=>x!==n); else { if(FAVS.length>=5){ showToast("최대 5개까지 가능"); return; } FAVS.push(n); } saveFavs(); renderFavChips(); renderPetList(); }
 
-/* 초성 검색 */
 const CHO_CODE = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 const CHO_SIMPLE = (c)=>({"ㄲ":"ㄱ","ㄸ":"ㄷ","ㅃ":"ㅂ","ㅆ":"ㅅ","ㅉ":"ㅈ"}[c]||c);
 function getChosung(str){
@@ -614,12 +606,11 @@ function showTip(target){
   });
   tipEl.classList.add('show');
   
-  // 위치 계산
   const rect = target.getBoundingClientRect();
   const tw = tipEl.offsetWidth;
   const th = tipEl.offsetHeight;
   let left = rect.left + rect.width/2 - tw/2;
-  left = Math.max(10, Math.min(left, window.innerWidth - tw - 10)); // 화면 안나가게
+  left = Math.max(10, Math.min(left, window.innerWidth - tw - 10));
   let top = rect.top - th - 10;
   if(top < 10) top = rect.bottom + 10;
   
@@ -627,7 +618,6 @@ function showTip(target){
   tipEl.style.top  = `${top}px`;
 }
 
-// 툴팁 이벤트 델리게이션
 document.addEventListener('mouseover', (e)=>{
   const t = e.target.closest('.tip'); if(t) showTip(t);
 }, true);
@@ -698,24 +688,20 @@ function renderPetList() {
     const item = document.createElement('div'); item.className = 'pet-item';
     if(selectedName === n) item.classList.add('selected');
     
-    // 왼쪽: 이름
     const nameSpan = document.createElement('span'); 
     nameSpan.className = 'pet-name'; 
     nameSpan.textContent = n;
     item.appendChild(nameSpan);
 
-    // 오른쪽: 뱃지 + 별
     const rightDiv = document.createElement('div');
     rightDiv.className = 'pet-right';
 
-    // 100% 보장 배지 확인 & 툴팁 데이터 생성
     const r8 = R8MAP[n];
     if (r8 && (Array.isArray(r8.obs_100_rank8) ? r8.obs_100_rank8.length : (r8.length||0))) {
         const badge = document.createElement('span');
-        badge.className = 'badge-r8 tip'; // tip 클래스 추가
+        badge.className = 'badge-r8 tip';
         badge.textContent = '100%';
         
-        // 툴팁 텍스트 생성
         const sets = Array.isArray(r8.obs_100_rank8) ? r8.obs_100_rank8 : r8;
         const maxShow = 15;
         const preview = sets.slice(0, maxShow).map(a=>`(${a[0]},${a[1]},${a[2]},${a[3]})`).join(' · ');
@@ -723,9 +709,7 @@ function renderPetList() {
         const tipText = `8등급 보장 초기치\n${preview}${more}`;
         badge.setAttribute('data-tip', tipText);
         
-        // [수정] 모바일 터치 시 부모(행) 클릭 이벤트(사이드바 닫힘) 방지
         badge.addEventListener('click', (e) => { e.stopPropagation(); });
-        
         rightDiv.appendChild(badge);
     }
     
@@ -743,7 +727,7 @@ function renderPetList() {
 }
 searchInput.addEventListener('input', renderPetList);
 
-/* ========= 1번 파일의 계산 로직 (Matrix & Enum) ========= */
+/* ========= 계산 로직 ========= */
 const ESET = Array.from({length: ((575-435)/5)+1 }, (_,i) => 575 - i*5);
 
 function solveUFromSG_JJYAL(SG, e){
@@ -781,7 +765,7 @@ function inferKU_JJYAL(S0, SG){
     for(let k=10;k<=100;k++){
       const s = s0_from_k_u_jjyal(k, sol.u);
       const l1 = s.reduce((a,c,i)=>a+Math.abs(c-S0int[i]),0);
-      if(l1===0) return {k, u:sol.u}; // Exact match
+      if(l1===0) return {k, u:sol.u};
       if(!best || l1<best.l1) best={k, u:sol.u, l1};
     }
   }
@@ -796,7 +780,7 @@ function enumerate_jjyal(pku, obs){
       const iH = new Decimal(u.hp+hr+hb).times(fac), iA = new Decimal(u.atk+ar+ab).times(fac);
       const iD = new Decimal(u.def+dr+db).times(fac), iG = new Decimal(u.agi+gr+gb).times(fac);
       
-      if(iG.floor().toNumber() !== obs[3]) continue; // Optimization
+      if(iG.floor().toNumber() !== obs[3]) continue;
       if(iH.times(4).plus(iA).plus(iD).plus(iG).floor().toNumber() !== obs[0]) continue;
       if(iH.times(0.1).plus(iA).plus(iD.times(0.1)).plus(iG.times(0.05)).floor().toNumber() !== obs[1]) continue;
       if(iH.times(0.1).plus(iA.times(0.1)).plus(iD).plus(iG.times(0.05)).floor().toNumber() !== obs[2]) continue;
@@ -814,16 +798,26 @@ function selectPetName(n){
   document.getElementById('selectedPetTitle').textContent = n;
 
   if(row?.s0){
-    document.getElementById('s0_hp').value = row.s0.hp; document.getElementById('s0_atk').value = row.s0.atk;
-    document.getElementById('s0_def').value = row.s0.def; document.getElementById('s0_agi').value = row.s0.agi;
-    document.getElementById('obs_hp').value = Math.floor(row.s0.hp); document.getElementById('obs_atk').value = Math.floor(row.s0.atk);
-    document.getElementById('obs_def').value = Math.floor(row.s0.def); document.getElementById('obs_agi').value = Math.floor(row.s0.agi);
+    // [수정] S급 기준 값들을 강제로 소수점 둘째자리까지 표기 (.toFixed(2) 사용)
+    document.getElementById('s0_hp').value = Number(row.s0.hp).toFixed(2);
+    document.getElementById('s0_atk').value = Number(row.s0.atk).toFixed(2);
+    document.getElementById('s0_def').value = Number(row.s0.def).toFixed(2);
+    document.getElementById('s0_agi').value = Number(row.s0.agi).toFixed(2);
+    
+    // 관측치(Lv.1 페트 능력치)는 게임 입력값이므로 정수 유지
+    document.getElementById('obs_hp').value = Math.floor(row.s0.hp); 
+    document.getElementById('obs_atk').value = Math.floor(row.s0.atk);
+    document.getElementById('obs_def').value = Math.floor(row.s0.def); 
+    document.getElementById('obs_agi').value = Math.floor(row.s0.agi);
   } else {
     ['s0_hp','s0_atk','s0_def','s0_agi','obs_hp','obs_atk','obs_def','obs_agi'].forEach(id=>document.getElementById(id).value="");
   }
   if(row?.sg){
-    document.getElementById('sg_hp').value = row.sg.hp; document.getElementById('sg_atk').value = row.sg.atk;
-    document.getElementById('sg_def').value = row.sg.def; document.getElementById('sg_agi').value = row.sg.agi;
+    // [수정] 성장률 역시 소수점 둘째자리 표기
+    document.getElementById('sg_hp').value = Number(row.sg.hp).toFixed(2);
+    document.getElementById('sg_atk').value = Number(row.sg.atk).toFixed(2);
+    document.getElementById('sg_def').value = Number(row.sg.def).toFixed(2);
+    document.getElementById('sg_agi').value = Number(row.sg.agi).toFixed(2);
   } else {
     ['sg_hp','sg_atk','sg_def','sg_agi'].forEach(id=>document.getElementById(id).value="");
   }
@@ -848,7 +842,6 @@ document.getElementById('btnCalc').addEventListener('click', () => {
       k=fit.k; u=fit.u;
   }
   
-  // Show Loading state if needed
   setTimeout(() => {
     const res = enumerate_jjyal({k,u}, obs);
     renderResult(res);
@@ -915,7 +908,7 @@ function renderResult(res) {
         <tbody>`;
       otherGrades.forEach(e => {
         const pct = (e.c/matches*100).toFixed(2);
-        let badgeClass = "rank-badge"; if(e.r >= 5) badgeClass += " a"; else badgeClass += " s"; // Simple color logic
+        let badgeClass = "rank-badge"; if(e.r >= 5) badgeClass += " a"; else badgeClass += " s"; 
         html += `<tr><td><span class="${badgeClass}">${e.r}등급</span></td><td>${e.c.toLocaleString()}</td><td>${pct}%</td></tr>`;
       });
       html += `</tbody></table></div>`;
@@ -930,7 +923,6 @@ function toggleDetails(btn) {
   else { details.classList.add('open'); btn.innerHTML = `▲ 접기`; btn.style.background = "rgba(255,255,255,0.15)"; }
 }
 
-/* Event Helpers */
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.s-btn'); if(!btn || !btn.dataset.target) return;
     const input = document.getElementById(btn.dataset.target);
@@ -941,7 +933,6 @@ function enableWheelStep(el){
 }
 ['obs_hp','obs_atk','obs_def','obs_agi'].forEach(id => { const el = document.getElementById(id); if(el) enableWheelStep(el); });
 
-/* Mobile Sidebar Logic */
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
 const closeBtn = document.getElementById('closeSidebarBtn');
