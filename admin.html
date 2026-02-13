@@ -355,7 +355,8 @@ const floor4 = (a)=> a.map(x=>Math.floor(x??NaN));
 function toFixed2(x){ return new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber(); }
 
 /* ====== 추정/검증 로직 ====== */
-const ESET = Array.from({ length: ((575 - 435) / 5) + 1 }, (_, i) => 575 - i*5);
+// 범위를 400~650으로 넓히고 1단위로 촘촘하게 탐색
+const ESET = Array.from({ length: (650 - 400) + 1 }, (_, i) => 650 - i);
 
 /* ★ S0: 원래 u를 넣으면 반드시 (u + 4.5)로 계산해야 함 */
 function s0_from_k_u_jjyal(k, u){
