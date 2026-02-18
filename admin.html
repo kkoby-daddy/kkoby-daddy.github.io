@@ -77,45 +77,77 @@
     .r8item .extra{ grid-column: 2 / 3; justify-self:start; margin-top:2px; }
   }
 
-  /* === 비밀번호 게이트 === */
+   /* === 비밀번호 게이트 (레이아웃 수정됨) === */
   body.locked{overflow:hidden}
   body.locked header, body.locked .grid{display:none}
+  
   #gate{
     position:fixed; inset:0; z-index:9999;
     display:flex; align-items:center; justify-content:center;
-    background:rgba(15,17,21,.94)
+    background:rgba(15,17,21,.96)
   }
+  
   #gate .panel{
-    width:min(420px,92vw); border-radius:14px; padding:18px;
-    background:#161a22; border:1px solid #232a36; color:#e8ecf3
+    width:min(380px, 92vw); 
+    background:#161a22; 
+    border:1px solid #232a36; 
+    border-radius:14px; 
+    padding:24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   }
+  
   #gate h2{margin:0 0 10px; font-size:18px}
-  #gate .row{display:flex; gap:8px; margin-top:8px}
-  #gate input{
-    flex:1 1 auto; padding:12px; border-radius:10px; border:1px solid #2a3040;
-    background:#0e1218; color:#e8ecf3; outline:none; font-size:14px
+  
+  #gate .input-row{
+    display:flex; gap:8px; margin-top:12px;
   }
-  #gate button{
-    padding:12px 14px; border-radius:10px; border:1px solid #334055;
-    background:#142033; color:#cfe1ff; font-weight:600; cursor:pointer
+  
+  #gate input[type="password"] {
+    flex:1; padding:12px; border-radius:10px; border:1px solid #2a3040;
+    background:#0e1218; color:#e8ecf3; outline:none; font-size:14px;
   }
+  
+  #gate button {
+    padding:12px 18px; border-radius:10px; border:1px solid #334055;
+    background:#142033; color:#cfe1ff; font-weight:600; cursor:pointer;
+  }
+  
+  .remember-wrap {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 14px; font-size: 13px; color: #8a9099; cursor: pointer;
+  }
+  .remember-wrap input[type="checkbox"] {
+    width: 16px; height: 16px; margin: 0; cursor: pointer;
+  }
+
   #gate .err{margin-top:8px; color:#ff7e92; font-size:13px; min-height:18px}
+
+  /* 모바일 최적화 */
+  @media (max-width: 780px){
+    .grid{grid-template-columns:1fr;gap:10px}
+    header{flex-wrap:wrap;gap:8px}
+    .grid2{grid-template-columns: repeat(2,1fr)}
+  }
 </style>
 </head>
 <body class="locked">
   <!-- 비밀번호 게이트 -->
   <div id="gate" role="dialog" aria-modal="true">
     <div class="panel">
-      <h2>Happy PET Admin</h2>
+      <h2>Together PET Admin</h2>
       <div class="muted" style="font-size:13px">접근을 위해 비밀번호를 입력하세요.</div>
-      <div class="row">
+      
+      <div class="input-row">
         <input id="gate_pass" type="password" placeholder="Password" autocomplete="current-password" />
         <button id="gate_btn">입장</button>
       </div>
-      <div id="gate_err" class="err"></div>
-      <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:#8a9099">
-        <input id="gate_rem" type="checkbox" /> 브라우저 탭에서 2시간 기억하기
+
+      <label class="remember-wrap">
+        <input id="gate_rem" type="checkbox" /> 
+        <span>브라우저 탭에서 2시간 기억하기</span>
       </label>
+
+      <div id="gate_err" class="err"></div>
     </div>
   </div>
 
