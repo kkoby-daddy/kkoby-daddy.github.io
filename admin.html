@@ -3,182 +3,252 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy PET Admin — 오버라이드 + 8확정 집계 (소숫점 계산기 추가)</title>
+<title>happy 놀이터 Admin</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Orbit&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0f1115; --panel:#161a22; --muted:#8a9099; --accent:#6aa0ff;
-    --ok:#35c759; --warn:#ffb300; --bad:#ff5171; --chip:#232a36;
-    --ring:#1f2530; --text:#e8ecf3; --highlight:#fff;
+  :root {
+    --bg-gradient: linear-gradient(135deg, #0f1115 0%, #1a1d26 100%);
+    --card-bg: rgba(35, 42, 54, 0.7);
+    --border: 1px solid rgba(255, 255, 255, 0.1);
+    --accent: #6aa0ff;
+    --accent-glow: rgba(106, 160, 255, 0.3);
+    --text-main: #e8ecf3;
+    --text-sub: #8a9099;
+    --ok: #35c759; --warn: #ffb300; --bad: #ff5171;
+    --font-main: 'Noto Sans KR', sans-serif;
+    --font-tech: 'Orbit', sans-serif;
+    --radius: 16px;
   }
-  *{box-sizing:border-box}
-  body{margin:0; background:#0f1115; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #232a36;background:#0c1016;position:sticky;top:0;z-index:10}
-  .brand{font-weight:700}
-  .grid{max-width:1200px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns: 340px 1fr;gap:14px}
-  .card{background:#161a22;border:1px solid #232a36;border-radius:12px; padding:12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  .col{flex:1 1 0}
-  label{display:block;font-size:12px;color:var(--muted);margin:6px 0 4px 2px}
-  input,textarea,select{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3040;
-    background:#0e1218; color:var(--text); outline:none; font-size:14px;
+  
+  * { box-sizing: border-box; }
+  
+  body {
+    margin: 0; background: var(--bg-gradient); color: var(--text-main); 
+    font-family: var(--font-main); min-height: 100vh;
   }
-  textarea{min-height:84px; resize:vertical}
-  .btn{padding:10px 12px;border-radius:10px;border:1px solid #334055;background:#142033;color:#cfe1ff;cursor:pointer;font-weight:600}
-  .btn:hover{filter:brightness(1.06)}
-  .btn.primary{background:linear-gradient(180deg,#2b71ff,#1d56cc);border-color:transparent;color:white}
-  .btn.ghost{background:transparent}
-  .btn-sm{padding: 6px 10px; font-size: 12px; border-radius: 8px;}
-  .filter-btn.active{ background: #142033; color: #cfe1ff; border-color: #334055; }
-  .btn.warn{border-color:#7a1e2e;background:#2a0f16;color:#ff8aa0}
-  .list{max-height:52vh;overflow:auto;border:1px solid #2a3040;border-radius:10px}
-  .item{padding:10px 12px;border-bottom:1px solid #222836;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}
-  .item:hover{background:#141924}
-  .muted{color:var(--muted)}
-  .tags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .tag{font-size:11px;border:1px solid #2b3242;border-radius:999px;padding:2px 8px}
-  .tag.ok{border-color:#275a34;background:#102214;color:#35c759}
-  .tag.warn{border-color:#7a5b0e;background:#241a05;color:#ffb300}
-  .tag.bad{border-color:#5a1e2a;background:#201016;color:#ff7e92}
-  .grid2{display:grid;grid-template-columns: repeat(4,1fr);gap:8px}
-  .grid3{display:grid;grid-template-columns: repeat(3,1fr);gap:8px}
-  .hr{height:1px;background:#242a36;margin:10px -12px}
-  .note{font-size:12px;color:#b8bfd0}
-  .callout{border:1px solid #334055;background:#0f1420;border-radius:10px;padding:10px 12px}
-  .callout.bad{border-color:#5a1e2a;background:#1a0f14}
-  .callout.ok{border-color:#275a34;background:#0f1912}
-  .right{display:flex;gap:8px;align-items:center}
-  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
 
-  /* ===== 8확정 리스트 정렬 고정 ===== */
-  .r8list{max-height:36vh; overflow:auto; border:1px solid #2a3040; border-radius:10px; padding:6px}
-  .r8item{
-    display:grid;
-    grid-template-columns: 22px 1fr auto; /* 체크박스 | 이름 | 태그 */
-    gap:8px; align-items:center; padding:8px; border-bottom:1px solid #222836; border-radius:8px;
+  /* 스크롤바 커스텀 */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+  
+  /* 헤더 스타일 */
+  header {
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 14px 24px; background: rgba(15, 17, 21, 0.8); 
+    backdrop-filter: blur(10px); border-bottom: var(--border);
+    position: sticky; top: 0; z-index: 10;
   }
-  .r8item:last-child{border-bottom:none}
-  .r8item input[type=checkbox]{ width:18px; height:18px; }
-  .r8item.disabled{opacity:.55}
-  .r8item .name{font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .r8item .extra{display:flex; gap:6px; align-items:center; justify-self:end; flex-wrap:wrap}
+  .brand { font-family: var(--font-tech); font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  
+  /* 메인 그리드 레이아웃 (좌우 카드 높이 동기화 - stretch 적용) */
+  .grid { 
+    max-width: 1400px; margin: 24px auto; padding: 0 20px; 
+    display: grid; grid-template-columns: 360px 1fr; gap: 20px; 
+    align-items: stretch; /* 우측 높이에 맞춰 좌측 높이도 자동으로 늘어남 */
+  }
+  .full-width { grid-column: 1 / -1; }
+  
+  /* 카드 (패널) 스타일 */
+  .card {
+    background: var(--card-bg); border: var(--border); border-radius: var(--radius); 
+    padding: 20px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .card h3 { 
+    margin: 0 0 16px; font-size: 16px; font-family: var(--font-tech); 
+    color: var(--accent); display: flex; align-items: center; gap: 8px; 
+  }
+  .card h3::before { content:''; display:block; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+
+  /* 좌측 카드 전용 (Flex 설정으로 리스트가 남은 공간 채우게 함) */
+  .card-left { display: flex; flex-direction: column; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .col { flex: 1 1 0; }
+  
+  label { display: block; font-size: 13px; color: var(--text-sub); margin: 6px 0 6px 4px; }
+  
+  /* 입력 폼 스타일 */
+  input, textarea, select {
+    width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.3); color: var(--text-main); outline: none; font-size: 14px;
+    font-family: var(--font-main); transition: 0.2s;
+  }
+  input[type="number"] { font-family: var(--font-tech); font-weight: 500; letter-spacing: 0.5px; }
+  input:focus, textarea:focus { border-color: var(--accent); background: rgba(0,0,0,0.5); }
+  textarea { min-height: 84px; resize: vertical; }
+  input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; margin: 0; }
+
+  /* 버튼 스타일 */
+  .btn {
+    padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); color: var(--text-main); cursor: pointer;
+    font-weight: 500; font-family: var(--font-main); transition: all 0.2s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+  .btn:active { transform: scale(0.98); }
+  
+  .btn.primary { background: var(--accent); color: #000; border: none; font-weight: 700; }
+  .btn.primary:hover { box-shadow: 0 0 15px var(--accent-glow); background: #82aeff; }
+  .btn.primary:disabled { background: #445; color: #888; cursor: not-allowed; box-shadow: none; transform: none; }
+  
+  .btn.ghost { background: transparent; }
+  .btn.ghost:hover { background: rgba(255,255,255,0.08); }
+  
+  .btn.warn { border-color: var(--bad); background: rgba(255,81,113,0.1); color: var(--bad); }
+  .btn.warn:hover { background: rgba(255,81,113,0.2); }
+  
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+  
+  /* 칩(필터) 스타일 */
+  .filter-btn { border-radius: 6px; font-size: 12px; padding: 6px 12px; }
+  .filter-btn.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); font-weight: 700; }
+
+  /* 리스트 스타일 (flex-grow를 이용해 높이 자동 조절) */
+  .list { 
+    flex: 1 1 0; /* 부모(card-left)의 남은 세로 공간을 모두 차지함 */
+    min-height: 500px; /* 기본 최소 높이 보장 */
+    overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 12px; background: rgba(0,0,0,0.2); padding: 6px; 
+  }
+  .item { padding: 12px 14px; border-radius: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 4px; }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: rgba(255,255,255,0.05); border-color: transparent; }
+  
+  .muted { color: var(--text-sub); }
+  .tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 8px; border: 1px solid transparent; }
+  .tag.ok { color: var(--ok); background: rgba(53,199,89,0.1); border-color: var(--ok); }
+  .tag.warn { color: var(--warn); background: rgba(255,179,0,0.1); border-color: var(--warn); }
+  .tag.bad { color: var(--bad); background: rgba(255,81,113,0.1); border-color: var(--bad); }
+  
+  .grid2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  
+  .hr { height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0; }
+  
+  .note { font-size: 12px; color: var(--text-sub); line-height: 1.4; }
+  
+  /* 콜아웃 (정보 패널) */
+  .callout { border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); border-radius: 12px; padding: 14px 16px; line-height: 1.5; font-size: 14px; }
+  .callout.bad { border-color: rgba(255,81,113,0.5); background: rgba(255,81,113,0.05); }
+  .callout.ok { border-color: rgba(53,199,89,0.5); background: rgba(53,199,89,0.05); }
+  
+  .right { display: flex; gap: 10px; align-items: center; }
+  .mono { font-family: var(--font-tech); letter-spacing: 0.5px; }
+
+  /* ===== 8확정 리스트 정렬 고정 (다중 컬럼 그리드 적용) ===== */
+  .r8list { 
+    max-height: 40vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 12px; background: rgba(0,0,0,0.2); padding: 12px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; align-content: start;
+  }
+  .r8item {
+    display: grid; grid-template-columns: auto 1fr auto; 
+    gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.03); 
+    border-radius: 8px; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.01);
+  }
+  .r8item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+  .r8item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .r8item.disabled:hover { background: rgba(255,255,255,0.01); border-color: rgba(255,255,255,0.03); }
+  .r8item .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .r8item .extra { display: flex; gap: 6px; align-items: center; justify-self: end; flex-wrap: wrap; }
+
+  /* 커스텀 체크박스 래퍼 */
+  .chk-label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-main); cursor: pointer; user-select: none; }
 
   /* 모바일 최적화 */
-  @media (max-width: 780px){
-    .grid{grid-template-columns:1fr;gap:10px}
-    header{flex-wrap:wrap;gap:8px}
-    .list{max-height:32vh}
-    input,textarea,select{font-size:16px;padding:12px 14px}
-    .btn{padding:12px 14px}
-    .grid2{grid-template-columns: repeat(2,1fr)}
-    .grid3{grid-template-columns: repeat(2,1fr)}
-    .r8item{ grid-template-columns: 24px 1fr; }
-    .r8item .extra{ grid-column: 2 / 3; justify-self:start; margin-top:2px; }
+  @media (max-width: 780px) {
+    .grid { grid-template-columns: 1fr; gap: 16px; margin: 16px auto; padding: 0 16px; }
+    header { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+    /* 모바일에서는 높이 고정으로 변경하여 레이아웃 붕괴 방지 */
+    .list { flex: none; max-height: 40vh; min-height: auto; }
+    .r8list { max-height: 40vh; grid-template-columns: 1fr; }
+    input, textarea, select { font-size: 15px; padding: 14px; }
+    .btn { padding: 12px 16px; font-size: 15px; }
+    .grid2 { grid-template-columns: repeat(2, 1fr); }
+    .grid3 { grid-template-columns: repeat(2, 1fr); }
   }
 
-   /* === 비밀번호 게이트 (레이아웃 수정됨) === */
-  body.locked{overflow:hidden}
-  body.locked header, body.locked .grid{display:none}
+  /* === 비밀번호 게이트 === */
+  body.locked { overflow: hidden; }
+  body.locked header, body.locked .grid { display: none; }
   
-  #gate{
-    position:fixed; inset:0; z-index:9999;
-    display:flex; align-items:center; justify-content:center;
-    background:rgba(15,17,21,.96)
+  #gate {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15,17,21,0.8); backdrop-filter: blur(8px);
   }
   
-  #gate .panel{
-    width:min(380px, 92vw); 
-    background:#161a22; 
-    border:1px solid #232a36; 
-    border-radius:14px; 
-    padding:24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  #gate .panel {
+    width: min(380px, 92vw); background: var(--card-bg); border: var(--border); 
+    border-radius: var(--radius); padding: 30px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center;
   }
-  
-  #gate h2{margin:0 0 10px; font-size:18px}
-  
-  #gate .input-row{
-    display:flex; gap:8px; margin-top:12px;
-  }
-  
+  #gate h2 { margin: 0 0 8px; font-size: 22px; font-family: var(--font-tech); color: var(--accent); }
+  #gate .input-row { display: flex; gap: 10px; margin-top: 10px; }
   #gate input[type="password"] {
-    flex:1; padding:12px; border-radius:10px; border:1px solid #2a3040;
-    background:#0e1218; color:#e8ecf3; outline:none; font-size:14px;
+    flex: 1; padding: 14px; border-radius: 10px; border: var(--border); background: rgba(0,0,0,0.4); 
+    color: var(--text-main); outline: none; font-size: 15px; letter-spacing: 2px;
   }
-  
   #gate button {
-    padding:12px 18px; border-radius:10px; border:1px solid #334055;
-    background:#142033; color:#cfe1ff; font-weight:600; cursor:pointer;
+    padding: 0 20px; border-radius: 10px; border: none; background: var(--accent); 
+    color: #000; font-weight: 700; cursor: pointer; transition: 0.2s;
   }
-  
-  .remember-wrap {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 14px; font-size: 13px; color: #8a9099; cursor: pointer;
-  }
-  .remember-wrap input[type="checkbox"] {
-    width: 16px; height: 16px; margin: 0; cursor: pointer;
-  }
-
-  #gate .err{margin-top:8px; color:#ff7e92; font-size:13px; min-height:18px}
-
-  /* 모바일 최적화 */
-  @media (max-width: 780px){
-    .grid{grid-template-columns:1fr;gap:10px}
-    header{flex-wrap:wrap;gap:8px}
-    .grid2{grid-template-columns: repeat(2,1fr)}
-  }
+  #gate button:hover { box-shadow: 0 0 15px var(--accent-glow); }
+  #gate .err { margin-top: 12px; color: var(--bad); font-size: 13px; min-height: 18px; font-weight: 500; }
 </style>
 </head>
 <body class="locked">
-  <!-- 비밀번호 게이트 -->
   <div id="gate" role="dialog" aria-modal="true">
     <div class="panel">
-      <h2>Happy PET Admin</h2>
-      <div class="muted" style="font-size:13px">접근을 위해 비밀번호를 입력하세요.</div>
-      
+      <h2>happy 놀이터 ADMIN</h2>
+      <div class="muted" style="font-size:13px; margin-bottom: 10px;">데이터 관리를 위해 비밀번호를 입력하세요.</div>
       <div class="input-row">
         <input id="gate_pass" type="password" placeholder="Password" autocomplete="current-password" />
         <button id="gate_btn">입장</button>
       </div>
-
-      <label class="remember-wrap">
-        <input id="gate_rem" type="checkbox" /> 
-        <span>브라우저 탭에서 2시간 기억하기</span>
-      </label>
-
       <div id="gate_err" class="err"></div>
     </div>
   </div>
 
 <header>
-  <div class="brand">Happy PET Admin</div>
+  <div class="brand">happy 놀이터 Admin</div>
   <div class="right">
-    <button class="btn" id="btnReload">원격 새로고침</button>
-    <button class="btn ghost" id="btnExport">로컬 다운로드</button>
-    <button class="btn primary" id="btnCommit">GitHub 커밋 (pets.json)</button>
+    <button class="btn ghost btn-sm" id="btnReload">원격 새로고침</button>
+    <button class="btn ghost btn-sm" id="btnExport">pets.json 다운로드</button>
+    <button class="btn ghost btn-sm" id="btnExportR8">full.json 다운로드</button>
+    <button class="btn primary btn-sm" id="btnCommit" style="margin-left:10px;">GitHub 커밋</button>
   </div>
 </header>
 
 <div class="grid">
-  <!-- 좌: 목록 -->
-  <section class="card">
-    <div class="row" style="margin-bottom:8px; gap:6px;" id="filterChips">
-      <label style="margin:0; align-self:center; font-size:13px; color:var(--muted);">필터:</label>
+  <section class="card card-left">
+    <div class="row" style="margin-bottom:12px; gap:8px;" id="filterChips">
+      <label style="margin:0; align-self:center; font-size:13px; color:var(--text-sub);">필터:</label>
       <button class="btn ghost btn-sm filter-btn active" data-filter="all">전체</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="no_s0sg">S0/SG 미완</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="no_ku">k/u 미완</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="no_s0sg">S0/SG 없음</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="no_ku">k/u 없음</button>
     </div>
 
-    <div class="row" style="margin-bottom:8px">
-      <input id="search" placeholder="이름 검색" />
-      <button class="btn" id="btnNew">+ 새 페트</button>
+    <div class="row" style="margin-bottom:12px">
+      <input id="search" placeholder="페트 이름 검색..." />
+      <button class="btn ghost" id="btnNew" style="white-space:nowrap;">+ 새 페트</button>
     </div>
+    
+    <div class="row" style="margin-bottom:8px; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.2); padding:8px 10px; border-radius:8px;">
+      <div style="display:flex; gap:6px;">
+        <button class="btn ghost btn-sm" id="btnListSelectAll">전체 선택</button>
+        <button class="btn ghost btn-sm" id="btnListClearAll">선택 해제</button>
+      </div>
+      <button class="btn primary btn-sm" id="btnBulkSolve" style="background:rgba(106,160,255,0.15); color:var(--accent); border:1px solid var(--accent);">일괄 k/u 추정</button>
+    </div>
+    
     <div class="list" id="list"></div>
   </section>
 
-  <!-- 우: 에디터 -->
-  <section class="card">
+  <section class="card card-right">
     <div class="row">
       <div class="col">
         <label>이름</label>
@@ -186,14 +256,14 @@
       </div>
       <div class="col">
         <label>메모(선택)</label>
-        <input id="note" placeholder="관리자 메모(내부용)" />
+        <input id="note" placeholder="관리자 메모 (내부용)" />
       </div>
     </div>
 
     <div class="hr"></div>
 
     <div>
-      <label>표기 초기치 S0 (체/공/방/순)</label>
+      <label style="color:var(--text-main); font-weight:500;">표기 초기치 S0 (체 / 공 / 방 / 순)</label>
       <div class="grid2">
         <input id="s0_hp"  type="number" step="0.01" placeholder="hp 67.62" />
         <input id="s0_atk" type="number" step="0.01" placeholder="atk 14.83" />
@@ -202,8 +272,8 @@
       </div>
     </div>
 
-    <div style="margin-top:10px">
-      <label>표기 성장치 Sg (체/공/방/순)</label>
+    <div style="margin-top:16px">
+      <label style="color:var(--text-main); font-weight:500;">표기 성장치 Sg (체 / 공 / 방 / 순)</label>
       <div class="grid2">
         <input id="sg_hp"  type="number" step="0.01" placeholder="hp 10.51" />
         <input id="sg_atk" type="number" step="0.01" placeholder="atk 2.30" />
@@ -214,17 +284,19 @@
 
     <div class="hr"></div>
 
-    <div class="row" style="align-items:center">
-      <label style="margin:0 8px 0 2px">
-        <input type="checkbox" id="ovr_check" /> 수동 오버라이드(k/u 강제)
+    <div class="row" style="align-items:center; justify-content:space-between;">
+      <label class="chk-label">
+        <input type="checkbox" id="ovr_check" /> 수동 오버라이드 (k/u 강제)
       </label>
-      <button class="btn" id="btnSolve">S0/SG로 k/u 추정</button>
-      <button class="btn warn" id="btnClearKU">오버라이드 해제</button>
-      <span class="note">※ 아래 k/u는 <b>원래 u(JJYAL)</b> 기준으로 입력/저장/연산됩니다.</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm ghost" id="btnSolve" style="border-color:var(--accent); color:var(--accent);">S0/SG로 k/u 추정</button>
+        <button class="btn btn-sm warn" id="btnClearKU">초기화</button>
+      </div>
     </div>
+    <div class="note" style="margin-top:6px; color:var(--warn); opacity:0.8;">※ 아래 k/u는 <b>원래 u(JJYAL)</b> 기준으로 입력/저장/연산됩니다.</div>
 
-    <div class="row" style="margin-top:8px">
-      <div style="min-width:120px">
+    <div class="row" style="margin-top:12px">
+      <div style="width:90px">
         <label>k</label>
         <input id="ku_k" type="number" step="1" placeholder="예: 28" />
       </div>
@@ -239,108 +311,89 @@
       </div>
     </div>
 
-    <div id="consistency" class="callout" style="margin-top:10px;display:none"></div>
+    <div id="consistency" class="callout" style="margin-top:16px; display:none"></div>
 
-    <!-- ★★★ [추가됨] 소숫점 역산 도우미 ★★★ -->
-    <div style="margin-top:10px">
-      <div class="row" style="align-items:center;margin-bottom:4px">
-        <span class="note" style="margin-left:2px">
-          <b>소숫점 역산 도우미</b> (S0/SG → 실제 값)
+    <div style="margin-top:16px; background:rgba(255,255,255,0.02); border-radius:12px; padding:12px 16px; border:1px dashed rgba(255,255,255,0.1);">
+      <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:8px">
+        <span class="note" style="color:var(--accent); font-weight:500;">
+          💡 소숫점 역산 도우미 (S0/SG → 실제 값)
         </span>
-        <button class="btn ghost" id="btnDecCalc" style="margin-left:auto">소숫점 계산</button>
+        <button class="btn ghost btn-sm" id="btnDecCalc" style="background:rgba(106,160,255,0.1); color:var(--accent); border-color:var(--accent);">소숫점 계산</button>
       </div>
-      <div id="decPanel" class="callout" style="display:none;font-size:13px"></div>
+      <div id="decPanel" class="callout" style="display:none; font-size:13px; margin-top:10px;"></div>
     </div>
-    <!-- ★★★ [추가됨] 끝 ★★★ -->
 
     <div class="hr"></div>
 
     <div class="row">
-      <button class="btn primary" id="btnSave">저장(브라우저)</button>
-      <button class="btn" id="btnSaveCommit">저장 후 pets.json 커밋</button>
-      <span class="note">커밋은 GitHub 토큰 필요</span>
+      <button class="btn col" id="btnSave">브라우저 저장</button>
+      <button class="btn primary col" id="btnSaveCommit">저장 후 pets.json 커밋</button>
     </div>
   </section>
 
-  <section class="card">
-    <h3 style="margin:4px 0 10px">④ 환각(8등급) 100% 초기치 집계 & 커밋</h3>
+  <section class="card full-width">
+    <h3> 8등급 100% 초기치 계산 & 커밋</h3>
     
-    <!-- --- 신규/수정 --- -->
-    <div class="row" style="margin-bottom:8px; gap:6px;" id="r8FilterChips">
-      <label style="margin:0; align-self:center; font-size:13px; color:var(--muted);">필터:</label>
+    <div class="row" style="margin-bottom:12px; gap:8px;" id="r8FilterChips">
+      <label style="margin:0; align-self:center; font-size:13px; color:var(--text-sub);">필터:</label>
       <button class="btn ghost btn-sm filter-btn active" data-filter="all">전체</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="todo_r8">R8 작업</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="has_r8">R8 있음</button>
-      <button class="btn ghost btn-sm filter-btn" data-filter="no_ku">k/u 없음</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="todo_r8">계산필요</button>
+      <button class="btn ghost btn-sm filter-btn" data-filter="has_r8">계산완료</button>
     </div>
-    <!-- --- /신규/수정 --- -->
 
-    <div class="row" style="align-items:center;margin-bottom:8px">
-      <button class="btn" id="btnR8SelectAll">모두 선택</button>
-      <button class="btn ghost" id="btnR8ClearAll">선택 해제</button>
+    <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:10px">
       <span class="note">k/u가 있는 페트만 선택 가능(오버라이드 포함)</span>
+      <div style="display:flex; gap:6px;">
+        <button class="btn ghost btn-sm" id="btnR8SelectAll">모두 선택</button>
+        <button class="btn ghost btn-sm" id="btnR8ClearAll">선택 해제</button>
+      </div>
     </div>
+    
     <div class="r8list" id="r8List"></div>
 
-    <div class="row" style="margin-top:10px">
-      <button class="btn" id="btnR8Run">선택 대상 집계</button>
-      <button class="btn primary" id="btnR8Commit" disabled>guaranteed_rank8.full.json 커밋</button>
+    <div class="row" style="margin-top:16px; justify-content: flex-end; gap:16px;">
+      <button class="btn" id="btnR8Run" style="border-color:var(--accent); color:var(--accent); padding: 12px 24px;">선택한 페트 100% 초기치 계산</button>
+      <button class="btn primary" id="btnR8Commit" disabled style="padding: 12px 24px;">full.json 커밋</button>
     </div>
-    <div id="r8Preview" class="callout" style="margin-top:10px; display:none"></div>
+    <div id="r8Preview" class="callout" style="margin-top:16px; display:none"></div>
   </section>
 </div>
 
-<!-- === 비밀번호 게이트 스크립트 (페이지 잠금/해제) === -->
 <script>
-/* ① 여기 해시값(HEX)을 바꿔 넣으세요. 예: '새_비번'의 SHA-256 HEX */
+// ----- 로그인 처리 -----
 const ADMIN_PASSWORD_HASH = "67014614aeb1b3c1f8be8cb87b930f3e36683d403a928e8a49388c6d3021670f";
-/* ② '2시간 기억하기' 체크 시 유지 시간(ms) */
 const LOGIN_TTL_MS = 2 * 60 * 60 * 1000;
 
 async function sha256Hex(text){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-function getSess(){
-  try{ return JSON.parse(sessionStorage.getItem("Happy_admin_ok")||"null"); }catch{ return null; }
-}
-function setSess(){
-  sessionStorage.setItem("Happy_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()}));
-}
-function sessValid(){
-  const s = getSess();
-  return !!(s && s.h===ADMIN_PASSWORD_HASH && (Date.now()-s.t) < LOGIN_TTL_MS);
-}
-function unlock(){
-  document.body.classList.remove("locked");
-  const g = document.getElementById("gate");
-  if(g) g.remove();
-}
+function getSess(){ try{ return JSON.parse(sessionStorage.getItem("happy_admin_ok")||"null"); }catch{ return null; } }
+function setSess(){ sessionStorage.setItem("happy_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()})); }
+function sessValid(){ const s = getSess(); return !!(s && s.h===ADMIN_PASSWORD_HASH && (Date.now()-s.t) < LOGIN_TTL_MS); }
+function unlock(){ document.body.classList.remove("locked"); const g = document.getElementById("gate"); if(g) g.remove(); }
 
 document.addEventListener("DOMContentLoaded", ()=>{
   const pass = document.getElementById("gate_pass");
   const btn  = document.getElementById("gate_btn");
   const err  = document.getElementById("gate_err");
-  const rem  = document.getElementById("gate_rem");
 
   if(sessValid()){ unlock(); return; }
 
   async function tryLogin(){
-    err.textContent = "";
-    const p = pass.value ?? "";
+    err.textContent = ""; const p = pass.value ?? "";
     if(!p){ err.textContent="비밀번호를 입력하세요."; pass.focus(); return; }
     try{
       const hex = await sha256Hex(p);
       if(hex === ADMIN_PASSWORD_HASH){
-        if(rem && rem.checked) setSess();
+        setSess(); // 체크박스 없이 무조건 2시간(세션) 유지
         unlock();
       }else{
         err.textContent = "비밀번호가 올바르지 않습니다.";
         pass.value = ""; pass.focus();
       }
     }catch(e){
-      err.textContent = "브라우저가 WebCrypto를 지원하지 않습니다.";
-      console.error(e);
+      err.textContent = "브라우저가 WebCrypto를 지원하지 않습니다."; console.error(e);
     }
   }
 
@@ -353,7 +406,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <script>
 /* ====== 설정 ====== */
 const GH_OWNER  = "kkoby-daddy";
-const GH_REPO   = "kkoby-daddy.github.io";
+const GH_REPO   = "kkoby_happy";
 const GH_BRANCH = "main";
 const PETS_PATH = "data/pets.json";
 const R8_PATH   = "data/guaranteed_rank8.full.json";
@@ -364,10 +417,9 @@ const LS_KEY = "adminPetsCache_v2";
 
 /* ====== 상태 ====== */
 let DB = {}; let ORDER = []; let CURRENT = null;
-let currentFilter = 'all';
-let currentR8Filter = 'all';
-let R8_DB = {}; // --- 신규 ---
-let R8_RESULT = {}; let R8_REMOTE_SHA = null;
+let currentFilter = 'all'; let currentR8Filter = 'all';
+let R8_DB = {}; let R8_RESULT = {}; let R8_REMOTE_SHA = null;
+let selectedListPets = new Set(); 
 
 /* ====== 유틸 ====== */
 function fetchJSON(url){
@@ -387,16 +439,12 @@ const floor4 = (a)=> a.map(x=>Math.floor(x??NaN));
 function toFixed2(x){ return new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber(); }
 
 /* ====== 추정/검증 로직 ====== */
-// 범위를 400~650으로 넓히고 1단위로 촘촘하게 탐색
 const ESET = Array.from({ length: (650 - 400) + 1 }, (_, i) => 650 - i);
 
-/* ★ S0: 원래 u를 넣으면 반드시 (u + 4.5)로 계산해야 함 */
 function s0_from_k_u_jjyal(k, u){
   const fac = k/100;
-  const vhp  = (u.hp + 4.5) * fac;
-  const vatk = (u.atk+ 4.5) * fac;
-  const vdef = (u.def+ 4.5) * fac;
-  const vagi = (u.agi+ 4.5) * fac;
+  const vhp  = (u.hp + 4.5) * fac; const vatk = (u.atk+ 4.5) * fac;
+  const vdef = (u.def+ 4.5) * fac; const vagi = (u.agi+ 4.5) * fac;
   const s_hp = Math.floor(vhp*4 + vatk + vdef + vagi);
   const s_atk= Math.floor(vhp*0.1 + vatk + vdef*0.1 + vagi*0.05);
   const s_def= Math.floor(vhp*0.1 + vatk*0.1 + vdef + vagi*0.05);
@@ -404,23 +452,17 @@ function s0_from_k_u_jjyal(k, u){
   return [s_hp,s_atk,s_def,s_agi];
 }
 
-/* ★ SG 역풀이: u.agi = round(SG.agi*10000/e - 4.5) */
 function solveUFromSG_STRICT(SG,e){
   try{
     if(!SG || ![SG.hp,SG.atk,SG.def,SG.agi].every(Number.isFinite)) return null;
     Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
 
-    const eD = new Decimal(e);
-    const f  = eD.dividedBy(10000);
-
+    const eD = new Decimal(e); const f  = eD.dividedBy(10000);
     const u_agi = new Decimal(SG.agi).times(10000).dividedBy(eD).minus(4.5).round();
     const dPlus45 = u_agi.plus(4.5);
 
-    // (u.hp+4.5)*4 + (u.atk+4.5) + (u.def+4.5) + (u.agi+4.5)
     const rhs1 = new Decimal(SG.hp).minus( dPlus45.times(f) ).dividedBy(f);
-    // (u.hp+4.5)*0.1 + (u.atk+4.5) + (u.def+4.5)*0.1 + (u.agi+4.5)*0.05
     const rhs2 = new Decimal(SG.atk).minus( dPlus45.times(f).times(0.05) ).dividedBy(f);
-    // (u.hp+4.5)*0.1 + (u.atk+4.5)*0.1 + (u.def+4.5) + (u.agi+4.5)*0.05
     const rhs3 = new Decimal(SG.def).minus( dPlus45.times(f).times(0.05) ).dividedBy(f);
 
     let A = [
@@ -428,7 +470,6 @@ function solveUFromSG_STRICT(SG,e){
       [ new Decimal(0.1), new Decimal(1),   new Decimal(0.1), rhs2 ],
       [ new Decimal(0.1), new Decimal(0.1), new Decimal(1),   rhs3 ],
     ];
-    // 가우스 소거
     for(let i=0;i<3;i++){
       let mr=i; let mv=A[i][i].abs();
       for(let j=i+1;j<3;j++){ const t=A[j][i].abs(); if(t.greaterThan(mv)){mr=j; mv=t;} }
@@ -442,13 +483,10 @@ function solveUFromSG_STRICT(SG,e){
       }
     }
     const aPrime=A[0][3], bPrime=A[1][3], cPrime=A[2][3];
-
-    // ★ unknown = (u + 4.5)였으므로 u = unknown - 4.5
     const u_hp  = aPrime.minus(4.5).round();
     const u_atk = bPrime.minus(4.5).round();
     const u_def = cPrime.minus(4.5).round();
 
-    // SG 반올림 검증 (u + 4.5)
     const r2 = x => new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
     const hp_chk  = r2( f.times( (u_hp.plus(4.5)).times(4).plus(u_atk.plus(4.5)).plus(u_def.plus(4.5)).plus(u_agi.plus(4.5)) ) );
     const atk_chk = r2( f.times( (u_hp.plus(4.5)).times(0.1).plus(u_atk.plus(4.5)).plus(u_def.plus(4.5).times(0.1)).plus(u_agi.plus(4.5).times(0.05)) ) );
@@ -477,12 +515,9 @@ function inferKU_STRICT(S0, SG){
   return null;
 }
 
-/* ★★★ [추가됨] S0/SG 실제 소숫점 계산 ★★★ */
-/* k/u(원래 u) 를 알 때, floor 전에 존재하는 "진짜" S0 값 */
 function computeS0RealFromKU(k, u){
   Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
   const fac = new Decimal(k).dividedBy(100);
-
   const hpB  = new Decimal(u.hp).plus(4.5).times(fac);
   const atkB = new Decimal(u.atk).plus(4.5).times(fac);
   const defB = new Decimal(u.def).plus(4.5).times(fac);
@@ -492,19 +527,14 @@ function computeS0RealFromKU(k, u){
   const atk = hpB.times(0.1).plus(atkB).plus(defB.times(0.1)).plus(agiB.times(0.05));
   const def = hpB.times(0.1).plus(atkB.times(0.1)).plus(defB).plus(agiB.times(0.05));
   const agi = agiB;
-
-  return { hp, atk, def, agi };   // Decimal 객체들
+  return { hp, atk, def, agi };
 }
 
-/* SG 표기에서 e(에센스)와 "진짜" SG 소숫점 계산 */
 function computeSGRealFromKU(u, SG){
   Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
   const uAgiPlus = new Decimal(u.agi).plus(4.5);
-
-  // sg_agi = e/10000 * (u_agi+4.5)
   const e = new Decimal(SG.agi).times(10000).dividedBy(uAgiPlus);
   const fac = e.dividedBy(10000);
-
   const uHpP  = new Decimal(u.hp).plus(4.5);
   const uAtkP = new Decimal(u.atk).plus(4.5);
   const uDefP = new Decimal(u.def).plus(4.5);
@@ -513,13 +543,9 @@ function computeSGRealFromKU(u, SG){
   const atk = fac.times( uHpP.times(0.1).plus(uAtkP).plus(uDefP.times(0.1)).plus(uAgiPlus.times(0.05)) );
   const def = fac.times( uHpP.times(0.1).plus(uAtkP.times(0.1)).plus(uDefP).plus(uAgiPlus.times(0.05)) );
   const agi = fac.times( uAgiPlus );
-
-  return { e, hp, atk, def, agi };   // e, Decimal 객체들
+  return { e, hp, atk, def, agi };
 }
-/* ★★★ [추가됨] 끝 ★★★ */
 
-
-/* ====== R8 집계 엔진 (원래 u 사용) ====== */
 function collectR8ObsForKU(k,u){
   Decimal.set({ precision:30, rounding: Decimal.ROUND_HALF_UP });
   const fac = new Decimal(k).dividedBy(100);
@@ -540,10 +566,8 @@ function collectR8ObsForKU(k,u){
                 const baseG = new Decimal(u.agi + gr + gb);
                 const baseH = new Decimal(u.hp  + hr + hb);
 
-                const iA = baseA.times(fac);
-                const iD = baseD.times(fac);
-                const iG = baseG.times(fac);
-                const iH = baseH.times(fac);
+                const iA = baseA.times(fac); const iD = baseD.times(fac);
+                const iG = baseG.times(fac); const iH = baseH.times(fac);
 
                 const atk = iH.times(0.1).plus(iA).plus(iD.times(0.1)).plus(iG.times(0.05)).floor().toNumber();
                 const def = iH.times(0.1).plus(iA.times(0.1)).plus(iD).plus(iG.times(0.05)).floor().toNumber();
@@ -563,9 +587,7 @@ function collectR8ObsForKU(k,u){
   }
   const out = [];
   for(const [key, set] of seen.entries()){
-    if(set.size===1 && set.has(8)){
-      out.push(key.split(',').map(n=>+n));
-    }
+    if(set.size===1 && set.has(8)){ out.push(key.split(',').map(n=>+n)); }
   }
   out.sort((a,b)=> a[0]-b[0] || a[1]-b[1] || a[2]-b[2] || a[3]-b[3]);
   return out;
@@ -577,23 +599,19 @@ const listEl = $("list"), searchEl = $("search");
 function renderList(){
   const kw = (searchEl.value||"").trim();
 
-  // 1. 현재 필터에 따라 ORDER를 먼저 필터링
   const filteredOrder = ORDER.filter(n => {
     const row = DB[n] || {};
     if (currentFilter === 'no_s0sg') {
-      // S0/SG가 없거나, 4개 스탯 중 하나라도 null이나 숫자가 아닌 경우
       const s0ok = row.s0 && Number.isFinite(row.s0.hp) && Number.isFinite(row.s0.atk) && Number.isFinite(row.s0.def) && Number.isFinite(row.s0.agi);
       const sgok = row.sg && Number.isFinite(row.sg.hp) && Number.isFinite(row.sg.atk) && Number.isFinite(row.sg.def) && Number.isFinite(row.sg.agi);
       return !s0ok || !sgok;
     }
     if (currentFilter === 'no_ku') {
-      // k/u 정보가 없는 경우
       return !(row?.ku_override || (Number.isFinite(row?.k) && row?.u));
     }
-    return true; // 'all' filter
+    return true; 
   });
 
-  // 2. 검색어로 한번 더 필터링
   const show = filteredOrder.filter(n => kw ? n.includes(kw) : true);
 
   listEl.innerHTML = "";
@@ -601,10 +619,30 @@ function renderList(){
     const d = document.createElement('div'); d.className="item"; d.textContent="결과 없음";
     listEl.appendChild(d); return;
   }
+  
   for(const n of show){
     const row = DB[n]||{};
     const it = document.createElement('div'); it.className="item";
-    const left = document.createElement('div'); left.textContent = n;
+    
+    // 좌측 컨테이너 (체크박스 + 이름)
+    const leftWrap = document.createElement('div');
+    leftWrap.style.display = "flex"; leftWrap.style.alignItems = "center"; leftWrap.style.gap = "10px";
+    
+    const cb = document.createElement('input');
+    cb.type = "checkbox"; cb.className = "list-pet-cb"; cb.value = n;
+    cb.checked = selectedListPets.has(n);
+    cb.onclick = (e) => { 
+      e.stopPropagation(); 
+      if(cb.checked) selectedListPets.add(n); else selectedListPets.delete(n);
+    };
+
+    const nameNode = document.createElement('div'); 
+    nameNode.textContent = n; nameNode.style.fontWeight = "500";
+    
+    leftWrap.appendChild(cb);
+    leftWrap.appendChild(nameNode);
+
+    // 우측 태그들
     const right = document.createElement('div'); right.className="tags";
     
     const s0ok = row.s0 && Number.isFinite(row.s0.hp) && Number.isFinite(row.s0.atk) && Number.isFinite(row.s0.def) && Number.isFinite(row.s0.agi);
@@ -620,11 +658,68 @@ function renderList(){
       const t2 = document.createElement('span'); t2.className="tag warn"; t2.textContent="k/u";
       right.appendChild(t2);
     }
-    it.appendChild(left); it.appendChild(right);
+    
+    it.appendChild(leftWrap); it.appendChild(right);
     it.addEventListener('click', ()=>loadForm(n));
     listEl.appendChild(it);
   }
 }
+
+// 리스트 선택 컨트롤
+$("btnListSelectAll").addEventListener("click", () => {
+  document.querySelectorAll("#list .list-pet-cb").forEach(cb => {
+    cb.checked = true;
+    selectedListPets.add(cb.value);
+  });
+});
+$("btnListClearAll").addEventListener("click", () => {
+  document.querySelectorAll("#list .list-pet-cb").forEach(cb => {
+    cb.checked = false;
+    selectedListPets.delete(cb.value);
+  });
+});
+
+// 리스트 일괄 k/u 추정
+$("btnBulkSolve").addEventListener("click", () => {
+  if(selectedListPets.size === 0) {
+    alert("선택된 페트가 없습니다."); return;
+  }
+  
+  let successCount = 0;
+  let failCount = 0;
+  
+  for(const name of selectedListPets) {
+    const r = DB[name];
+    if(!r) continue;
+    
+    const S0 = r.s0; const SG = r.sg;
+    const s0ok = S0 && Number.isFinite(S0.hp) && Number.isFinite(S0.atk) && Number.isFinite(S0.def) && Number.isFinite(S0.agi);
+    const sgok = SG && Number.isFinite(SG.hp) && Number.isFinite(SG.atk) && Number.isFinite(SG.def) && Number.isFinite(SG.agi);
+    
+    if(!s0ok || !sgok) {
+      failCount++; continue;
+    }
+    
+    const sol = inferKU_STRICT([S0.hp, S0.atk, S0.def, S0.agi], SG);
+    if(sol) {
+      r.k = sol.k;
+      r.u = sol.u;
+      r.ku_override = true;
+      successCount++;
+    } else {
+      failCount++;
+    }
+  }
+  
+  saveLS();
+  renderList();
+  renderR8List();
+  if(CURRENT && selectedListPets.has(CURRENT)) {
+    loadForm(CURRENT);
+  }
+  alert(`일괄 k/u 추정 완료!\n\n성공: ${successCount}건\n실패(불가/미완): ${failCount}건\n\n브라우저 저장 완료. 커밋하려면 [저장 후 커밋] 버튼을 누르세요.`);
+});
+
 
 function loadForm(name){
   CURRENT = name;
@@ -646,63 +741,34 @@ function loadForm(name){
   $("ku_def").value = r?.u?.def ?? "";
   $("ku_agi").value = r?.u?.agi ?? "";
   updateConsistency();
-  renderR8List(); // ★ 폼 로드 시 R8 목록도 갱신 (필터 유지)
+  renderR8List(); 
 }
 
 function gatherForm(){
   const name = $("name").value.trim();
-
-  const s0 = {
-    hp: num($("s0_hp").value),
-    atk: num($("s0_atk").value),
-    def: num($("s0_def").value),
-    agi: num($("s0_agi").value)
-  };
-  const sg = {
-    hp: num($("sg_hp").value),
-    atk: num($("sg_atk").value),
-    def: num($("sg_def").value),
-    agi: num($("sg_agi").value)
-  };
-
+  const s0 = { hp: num($("s0_hp").value), atk: num($("s0_atk").value), def: num($("s0_def").value), agi: num($("s0_agi").value) };
+  const sg = { hp: num($("sg_hp").value), atk: num($("sg_atk").value), def: num($("sg_def").value), agi: num($("sg_agi").value) };
   const ovr = $("ovr_check").checked;
-
   let k = num($("ku_k").value);
-  let u = {
-    hp: num($("ku_hp").value),
-    atk: num($("ku_atk").value),
-    def: num($("ku_def").value),
-    agi: num($("ku_agi").value)
-  };
+  let u = { hp: num($("ku_hp").value), atk: num($("ku_atk").value), def: num($("ku_def").value), agi: num($("ku_agi").value) };
   if(!ovr){ k = null; u = null; }
-
   return { name, s0, sg, ovr, k, u, note: $("note").value.trim() };
 }
 
 function updateConsistency(){
   const box = $("consistency");
-  box.className = "callout";
-  box.style.display = "none";
-
+  box.className = "callout"; box.style.display = "none";
   const f = gatherForm();
-  const ready =
-    f?.ovr &&
-    Number.isFinite(f.k) &&
-    f.u && [f.u.hp, f.u.atk, f.u.def, f.u.agi].every(Number.isFinite) &&
-    [f.s0.hp, f.s0.atk, f.s0.def, f.s0.agi].every(Number.isFinite) &&
-    [f.sg.hp, f.sg.atk, f.sg.def, f.sg.agi].every(Number.isFinite);
-
+  const ready = f?.ovr && Number.isFinite(f.k) && f.u && [f.u.hp, f.u.atk, f.u.def, f.u.agi].every(Number.isFinite) &&
+    [f.s0.hp, f.s0.atk, f.s0.def, f.s0.agi].every(Number.isFinite) && [f.sg.hp, f.sg.atk, f.sg.def, f.sg.agi].every(Number.isFinite);
   if(!ready){ box.innerHTML = ""; return; }
 
-  // S0 정수 비교 (u + 4.5)
   const sPred = s0_from_k_u_jjyal(f.k, f.u);
   const sInt  = [f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].map(v=>Math.floor(v));
   const okS0  = (sPred[0]===sInt[0] && sPred[1]===sInt[1] && sPred[2]===sInt[2] && sPred[3]===sInt[3]);
 
   try{
     Decimal.set({ precision:50, rounding: Decimal.ROUND_HALF_UP });
-
-    // SG 참고 e (u + 4.5)
     const e = new Decimal(f.sg.agi).times(10000).dividedBy(new Decimal(f.u.agi).plus(4.5));
     const fct = e.dividedBy(10000);
     const r2  = x => new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
@@ -720,172 +786,106 @@ function updateConsistency(){
 
     box.innerHTML = `
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px">
-        <strong>일관성 검사</strong>
+        <strong style="color:var(--text-main);">일관성 검사</strong>
         <span class="mono muted">k=${f.k}, u=(${f.u.hp},${f.u.atk},${f.u.def},${f.u.agi})</span>
       </div>
-      <div class="${okS0?'ok':'bad'}">S0 정수부 일치: <b>${okS0?'OK':'불일치'}</b> (예측 ${sPred.join('/')}, 실제 ${sInt.join('/')})</div>
+      <div style="color:${okS0?'var(--ok)':'var(--bad)'}">S0 정수부 일치: <b>${okS0?'OK':'불일치'}</b> (예측 ${sPred.join('/')}, 실제 ${sInt.join('/')})</div>
       <div style="margin-top:6px">
         <div>SG 참고(e≈<span class="mono">${eVal.toFixed(2)}</span>): 
           HP <span class="mono">${hpC.toFixed(2)}</span> (${hpDiff>=0?'+':''}${hpDiff}),
           ATK <span class="mono">${atkC.toFixed(2)}</span> (${atkDiff>=0?'+':''}${atkDiff}),
           DEF <span class="mono">${defC.toFixed(2)}</span> (${defDiff>=0?'+':''}${defDiff})
         </div>
-        <div class="${sgOk?'ok':'bad'}">SG 반올림 비교: <b>${sgOk?'OK':'차이 있음'}</b></div>
+        <div style="color:${sgOk?'var(--ok)':'var(--bad)'}">SG 반올림 비교: <b>${sgOk?'OK':'차이 있음'}</b></div>
       </div>
-      <div class="note" style="margin-top:6px">※ k/u는 항상 <b>원래 u</b> 기준입니다.</div>
+      <div class="note" style="margin-top:8px; opacity:0.8;">※ k/u는 항상 <b>원래 u</b> 기준입니다.</div>
     `;
-    box.classList.add(okS0 ? "ok" : "bad");
+    box.classList.add(okS0 && sgOk ? "ok" : "bad");
     box.style.display = "block";
   }catch{
-    box.innerHTML = `<b>일관성 검사 실패</b> (내부 계산 오류)`;
-    box.classList.add("bad");
-    box.style.display = "block";
+    box.innerHTML = `<b style="color:var(--bad)">일관성 검사 실패</b> (내부 계산 오류)`;
+    box.classList.add("bad"); box.style.display = "block";
   }
 }
 
-/* ★★★ [추가됨] 소숫점 역산 도우미 패널 ★★★ */
 function renderDecimalsPanel(){
   const box = $("decPanel");
-  box.className = "callout";
-  box.style.display = "none";
-  box.innerHTML = "";
+  box.className = "callout"; box.style.display = "none"; box.innerHTML = "";
 
   const f = gatherForm();
-  if(!f.name){
-    alert("이름을 먼저 입력하세요.");
-    return;
-  }
-  if([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].some(v=>v==null) ||
-     [f.sg.hp,f.sg.atk,f.sg.def,f.sg.agi].some(v=>v==null)){
-    alert("S0/SG를 모두 채운 뒤 사용해 주세요.");
-    return;
+  if(!f.name){ alert("이름을 먼저 입력하세요."); return; }
+  if([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].some(v=>v==null) || [f.sg.hp,f.sg.atk,f.sg.def,f.sg.agi].some(v=>v==null)){
+    alert("S0/SG를 모두 채운 뒤 사용해 주세요."); return;
   }
 
   let k = null, u = null, src = "";
-
-  // 1) 오버라이드 k/u가 완전히 들어있으면 그걸 우선 사용
-  const hasOverride =
-    f.ovr &&
-    Number.isFinite(f.k) &&
-    f.u && [f.u.hp,f.u.atk,f.u.def,f.u.agi].every(Number.isFinite);
+  const hasOverride = f.ovr && Number.isFinite(f.k) && f.u && [f.u.hp,f.u.atk,f.u.def,f.u.agi].every(Number.isFinite);
 
   if(hasOverride){
     k = f.k; u = f.u; src = "override";
   }else{
-    // 2) 아니면 STRICT 추정 시도
     const sol = inferKU_STRICT([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi], f.sg);
     if(!sol){
-      box.classList.add("bad");
-      box.style.display = "block";
-      box.innerHTML = `
-        <b>소숫점 계산 실패</b><br>
-        현재 S0/SG 조합으로는 STRICT 모드에서 k/u를 찾을 수 없습니다.<br>
-        (필요하다면 수동 오버라이드 후 다시 시도해 주세요.)
-      `;
+      box.classList.add("bad"); box.style.display = "block";
+      box.innerHTML = `<b style="color:var(--bad)">소숫점 계산 실패</b><br>현재 S0/SG 조합으로는 STRICT 모드에서 k/u를 찾을 수 없습니다.<br>(필요하다면 수동 오버라이드 후 다시 시도해 주세요.)`;
       return;
     }
     k = sol.k; u = sol.u; src = "strict-auto";
   }
 
-  // 실제 값 계산
   const S0real = computeS0RealFromKU(k, u);
-  const S0hp   = S0real.hp.toNumber();
-  const S0atk  = S0real.atk.toNumber();
-  const S0def  = S0real.def.toNumber();
-  const S0agi  = S0real.agi.toNumber();
-  // ★ 추가: 소숫점 S0를 입력칸에 자동 반영
-  $("s0_hp").value  = S0hp.toFixed(2);
-  $("s0_atk").value = S0atk.toFixed(2);
-  $("s0_def").value = S0def.toFixed(2);
-  $("s0_agi").value = S0agi.toFixed(2);
-
-  // S0이 바뀌었으니 일관성 검사 다시 실행
+  const S0hp   = S0real.hp.toNumber(); const S0atk  = S0real.atk.toNumber();
+  const S0def  = S0real.def.toNumber(); const S0agi  = S0real.agi.toNumber();
+  
+  $("s0_hp").value  = S0hp.toFixed(2); $("s0_atk").value = S0atk.toFixed(2);
+  $("s0_def").value = S0def.toFixed(2); $("s0_agi").value = S0agi.toFixed(2);
   updateConsistency();
   
-  const S0floor = {
-    hp: Math.floor(S0hp),
-    atk: Math.floor(S0atk),
-    def: Math.floor(S0def),
-    agi: Math.floor(S0agi),
-  };
-  const S0int = {
-    hp: Math.floor(f.s0.hp),
-    atk: Math.floor(f.s0.atk),
-    def: Math.floor(f.s0.def),
-    agi: Math.floor(f.s0.agi),
-  };
-  const okS0 =
-    S0floor.hp===S0int.hp &&
-    S0floor.atk===S0int.atk &&
-    S0floor.def===S0int.def &&
-    S0floor.agi===S0int.agi;
+  const S0floor = { hp: Math.floor(S0hp), atk: Math.floor(S0atk), def: Math.floor(S0def), agi: Math.floor(S0agi) };
+  const S0int = { hp: Math.floor(f.s0.hp), atk: Math.floor(f.s0.atk), def: Math.floor(f.s0.def), agi: Math.floor(f.s0.agi) };
+  const okS0 = S0floor.hp===S0int.hp && S0floor.atk===S0int.atk && S0floor.def===S0int.def && S0floor.agi===S0int.agi;
 
   const SGreal = computeSGRealFromKU(u, f.sg);
   const eVal   = SGreal.e.toNumber();
-
   const r2 = x => new Decimal(x).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber();
-  const SGhpR  = r2(SGreal.hp);
-  const SGatkR = r2(SGreal.atk);
-  const SGdefR = r2(SGreal.def);
-  const SGagiR = r2(SGreal.agi);
-
-  const diff = {
-    hp: r2(SGhpR  - f.sg.hp),
-    atk: r2(SGatkR - f.sg.atk),
-    def: r2(SGdefR - f.sg.def),
-    agi: r2(SGagiR - f.sg.agi),
-  };
+  
+  const SGhpR  = r2(SGreal.hp); const SGatkR = r2(SGreal.atk);
+  const SGdefR = r2(SGreal.def); const SGagiR = r2(SGreal.agi);
+  const diff = { hp: r2(SGhpR  - f.sg.hp), atk: r2(SGatkR - f.sg.atk), def: r2(SGdefR - f.sg.def), agi: r2(SGagiR - f.sg.agi) };
   const okSG = diff.hp===0 && diff.atk===0 && diff.def===0 && diff.agi===0;
-
-  const modeLabel =
-    src==="override" ? "오버라이드 k/u 사용"
-    : src==="strict-auto" ? "S0/SG로 STRICT 자동 추정"
-    : src;
+  const modeLabel = src==="override" ? "오버라이드 k/u 사용" : src==="strict-auto" ? "S0/SG로 STRICT 자동 추정" : src;
 
   box.innerHTML = `
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px">
-      <strong>소숫점 역산 결과</strong>
-      <span class="mono muted">${modeLabel}</span>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px">
+      <strong style="color:var(--text-main);">소숫점 역산 결과</strong><span class="mono muted">${modeLabel}</span>
     </div>
-
-    <div class="mono muted" style="margin-bottom:6px">
+    <div class="mono muted" style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05);">
       k=${k}, u=(${u.hp},${u.atk},${u.def},${u.agi}), e≈${eVal.toFixed(2)}
     </div>
-
-    <div style="margin-bottom:4px"><b>S0 (레벨1 실제 값)</b></div>
+    <div style="margin-bottom:4px; color:var(--text-main);"><b>S0 (레벨1 실제 값)</b></div>
     <div class="note mono" style="margin-bottom:6px">
-      HP ${S0hp.toFixed(6)} / ATK ${S0atk.toFixed(6)} /
-      DEF ${S0def.toFixed(6)} / AGI ${S0agi.toFixed(6)}<br>
-      → floor 기준: (${S0floor.hp}/${S0floor.atk}/${S0floor.def}/${S0floor.agi}),
-      표기 S0 정수: (${S0int.hp}/${S0int.atk}/${S0int.def}/${S0int.agi})
+      HP ${S0hp.toFixed(6)} / ATK ${S0atk.toFixed(6)} / DEF ${S0def.toFixed(6)} / AGI ${S0agi.toFixed(6)}<br>
+      → floor 기준: (${S0floor.hp}/${S0floor.atk}/${S0floor.def}/${S0floor.agi}), 표기 S0 정수: (${S0int.hp}/${S0int.atk}/${S0int.def}/${S0int.agi})
     </div>
-    <div class="${okS0?'ok':'bad'}">S0 정수 일치: <b>${okS0?'OK':'불일치'}</b></div>
-
-    <div style="margin-top:10px;margin-bottom:4px"><b>SG (성장치 실제 값)</b></div>
+    <div style="color:${okS0?'var(--ok)':'var(--bad)'}; margin-bottom:10px;">S0 정수 일치: <b>${okS0?'OK':'불일치'}</b></div>
+    <div style="margin-top:12px; margin-bottom:4px; color:var(--text-main);"><b>SG (성장치 실제 값)</b></div>
     <div class="note mono" style="margin-bottom:6px">
       HP ${SGreal.hp.toNumber().toFixed(6)} → 표기 ${SGhpR.toFixed(2)} (Δ${diff.hp>=0?'+':''}${diff.hp})<br>
       ATK ${SGreal.atk.toNumber().toFixed(6)} → 표기 ${SGatkR.toFixed(2)} (Δ${diff.atk>=0?'+':''}${diff.atk})<br>
       DEF ${SGreal.def.toNumber().toFixed(6)} → 표기 ${SGdefR.toFixed(2)} (Δ${diff.def>=0?'+':''}${diff.def})<br>
       AGI ${SGreal.agi.toNumber().toFixed(6)} → 표기 ${SGagiR.toFixed(2)} (Δ${diff.agi>=0?'+':''}${diff.agi})
     </div>
-    <div class="${okSG?'ok':'bad'}">SG 반올림 비교: <b>${okSG?'OK':'차이 있음'}</b></div>
-
-    <div class="note" style="margin-top:6px">
-      ※ 이 값들은 floor/반올림 되기 <b>직전</b>의 내부 실수 값을 보여 줍니다.<br>
-      ※ S0 불일치나 SG 오차가 크면, S0/SG 입력 또는 k/u 설정을 다시 한 번 확인해 주세요.
+    <div style="color:${okSG?'var(--ok)':'var(--bad)'}">SG 반올림 비교: <b>${okSG?'OK':'차이 있음'}</b></div>
+    <div class="note" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); opacity:0.8;">
+      ※ 이 값들은 floor/반올림 되기 <b>직전</b>의 내부 실수 값을 보여 줍니다.<br>※ S0 불일치나 SG 오차가 크면, S0/SG 입력 또는 k/u 설정을 다시 한 번 확인해 주세요.
     </div>
   `;
-
-  box.classList.add(okS0 && okSG ? "ok" : "bad");
-  box.style.display = "block";
+  box.classList.add(okS0 && okSG ? "ok" : "bad"); box.style.display = "block";
 }
-/* ★★★ [추가됨] 끝 ★★★ */
-
 
 /* ====== 이벤트 바인딩 ====== */
 $("btnReload").addEventListener("click", async ()=>{
-  await loadRemote();
-  alert("원격 데이터를 불러왔습니다.");
+  await loadRemote(); alert("원격 데이터를 불러왔습니다.");
 });
 $("btnNew").addEventListener("click", ()=>{
   const name = prompt("새 페트 이름?");
@@ -895,47 +895,37 @@ $("btnNew").addEventListener("click", ()=>{
   sortNames(); renderList(); loadForm(name);
 });
 searchEl.addEventListener("input", renderList);
-$("btnDecCalc").addEventListener("click", renderDecimalsPanel); // ★★★ [추가됨] 이벤트 리스너 ★★★
+$("btnDecCalc").addEventListener("click", () => {
+  const box = $("decPanel");
+  if (box.style.display === "block") {
+    box.style.display = "none";
+  } else {
+    renderDecimalsPanel();
+  }
+}); 
 
-// --- 신규: 페트 목록 필터 리스너 ---
 document.getElementById("filterChips").addEventListener("click", (e) => {
   const btn = e.target.closest(".filter-btn");
   if (!btn) return;
-  
   const filter = btn.dataset.filter;
   if (filter === currentFilter) return;
   currentFilter = filter;
-
-  document.querySelectorAll("#filterChips .filter-btn").forEach(b => {
-    b.classList.remove("active");
-  });
+  document.querySelectorAll("#filterChips .filter-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-
   renderList();
 });
-// --- /신규 ---
 
-
-// [버튼] S0/SG로 k/u 추정
 $("btnSolve").addEventListener("click", ()=>{
   const f = gatherForm();
   if(!f || !f.name){ alert("이름을 입력하세요."); return; }
-  if([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].some(v=>v==null) ||
-     [f.sg.hp,f.sg.atk,f.sg.def,f.sg.agi].some(v=>v==null)){
+  if([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi].some(v=>v==null) || [f.sg.hp,f.sg.atk,f.sg.def,f.sg.agi].some(v=>v==null)){
     alert("S0/SG를 모두 채워 주세요."); return;
   }
   const sol = inferKU_STRICT([f.s0.hp,f.s0.atk,f.s0.def,f.s0.agi], f.sg);
   if(!sol){ alert("계산할 수 없는 값입니다(STRICT 해 없음)."); return; }
-
-  $("ku_k").value   = sol.k;
-  $("ku_hp").value  = sol.u.hp;
-  $("ku_atk").value = sol.u.atk;
-  $("ku_def").value = sol.u.def;
-  $("ku_agi").value = sol.u.agi;
-  $("ovr_check").checked = true;
-
-  updateConsistency();
-  alert(`추정 완료: k=${sol.k}, u=(${sol.u.hp},${sol.u.atk},${sol.u.def},${sol.u.agi})`);
+  $("ku_k").value   = sol.k; $("ku_hp").value  = sol.u.hp; $("ku_atk").value = sol.u.atk;
+  $("ku_def").value = sol.u.def; $("ku_agi").value = sol.u.agi; $("ovr_check").checked = true;
+  updateConsistency(); alert(`추정 완료: k=${sol.k}, u=(${sol.u.hp},${sol.u.atk},${sol.u.def},${sol.u.agi})`);
 });
 
 ["ovr_check","ku_k","ku_hp","ku_atk","ku_def","ku_agi","s0_hp","s0_atk","s0_def","s0_agi","sg_hp","sg_atk","sg_def","sg_agi"]
@@ -949,50 +939,37 @@ $("btnClearKU").addEventListener("click", ()=>{
 
 $("btnSave").addEventListener("click", ()=>{
   const f = gatherForm();
-
   if(!f.name){ alert("이름을 입력하세요."); return; }
   const s0ok = f.s0 && Number.isFinite(f.s0.hp) && Number.isFinite(f.s0.atk) && Number.isFinite(f.s0.def) && Number.isFinite(f.s0.agi);
   const sgok = f.sg && Number.isFinite(f.sg.hp) && Number.isFinite(f.sg.atk) && Number.isFinite(f.sg.def) && Number.isFinite(f.sg.agi);
-  if(!s0ok || !sgok){
-   alert("S0/SG 4개 스탯을 모두 채워 주세요."); return;
-  }
+  if(!s0ok || !sgok){ alert("S0/SG 4개 스탯을 모두 채워 주세요."); return; }
   
-  if(f.ovr){
-    if(!(Number.isFinite(f.k) && f.u && [f.u.hp,f.u.atk,f.u.def,f.u.agi].every(Number.isFinite))){
-      alert("오버라이드 k/u를 모두 채워 주세요."); return;
-    }
-  }
+  if(f.ovr){ if(!(Number.isFinite(f.k) && f.u && [f.u.hp,f.u.atk,f.u.def,f.u.agi].every(Number.isFinite))){ alert("오버라이드 k/u를 모두 채워 주세요."); return; } }
+  
   if(CURRENT && CURRENT !== f.name){
     if(DB[f.name]){ alert("해당 이름은 이미 존재합니다."); return; }
-    DB[f.name] = DB[CURRENT];
-    delete DB[CURRENT];
-    CURRENT = f.name;
+    DB[f.name] = DB[CURRENT]; delete DB[CURRENT]; CURRENT = f.name;
   }
   const row = DB[f.name] || {};
   row.s0 = f.s0; row.sg = f.sg; row.note = f.note || undefined;
-  if(f.ovr){ row.k=f.k; row.u=f.u; row.ku_override=true; }
-  else { delete row.k; delete row.u; delete row.ku_override; }
-  DB[f.name] = row;
-  sortNames(); 
-  renderList(); // ★ 저장 시 상단 목록 갱신 (필터 반영)
-  renderR8List(); // ★ 저장 시 하단 R8 목록도 갱신 (필터 반영)
-  loadForm(f.name);
-  saveLS();
+  if(f.ovr){ row.k=f.k; row.u=f.u; row.ku_override=true; } else { delete row.k; delete row.u; delete row.ku_override; }
+  DB[f.name] = row; sortNames(); renderList(); renderR8List(); loadForm(f.name); saveLS();
   alert("저장(브라우저) 완료. 커밋하려면 상단 버튼을 사용하세요.");
 });
 
-$("btnSaveCommit").addEventListener("click", async ()=>{
-  $("btnSave").click();
-  await commitPets();
-});
+$("btnSaveCommit").addEventListener("click", async ()=>{ $("btnSave").click(); await commitPets(); });
 
+// 다운로드 기능
 $("btnExport").addEventListener("click", ()=>{
   const blob = new Blob([JSON.stringify(DB, null, 2)], {type:"application/json;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "pets.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "pets.json";
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+$("btnExportR8").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(R8_DB, null, 2)], {type:"application/json;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "guaranteed_rank8.full.json";
+  a.click(); URL.revokeObjectURL(a.href);
 });
 
 $("btnCommit").addEventListener("click", commitPets);
@@ -1004,72 +981,41 @@ async function commitPets(){
   const metaUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(PETS_PATH)}?ref=${GH_BRANCH}`;
   const metaRes = await fetch(metaUrl, {headers:{Accept:"application/vnd.github+json"}});
   if(!metaRes.ok){ alert("원격 SHA 조회 실패: " + metaRes.status); return; }
-  const meta = await metaRes.json();
-  const sha = meta.sha;
+  const meta = await metaRes.json(); const sha = meta.sha;
 
   const putRes = await fetch(metaUrl, {
     method:"PUT",
-    headers:{
-      "Authorization":`Bearer ${token}`,
-      "Accept":"application/vnd.github+json",
-      "Content-Type":"application/json"
-    },
+    headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
     body: JSON.stringify({
       message: prompt("커밋 메시지 입력", "chore(admin): update pets.json (manual ku override)") || "update pets.json",
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2)))),
-      branch: GH_BRANCH,
-      sha
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2)))), branch: GH_BRANCH, sha
     })
   });
-  if(!putRes.ok){ 
-    const t = await putRes.text().catch(()=>"(no body)");
-    alert("커밋 실패: " + res.status + "\n" + t);
-    return;
-  }
+  if(!putRes.ok){ const t = await putRes.text().catch(()=>"(no body)"); alert("커밋 실패: " + putRes.status + "\n" + t); return; }
   alert("pets.json 커밋 성공!");
 }
 
 /* ====== R8 UI ====== */
 function renderR8List(){
-  const box = $("r8List");
-  box.innerHTML = "";
+  const box = $("r8List"); box.innerHTML = "";
 
-  // --- 신규/수정: R8 목록 필터링 (R8_DB 기준) ---
   const filteredOrder = ORDER.filter(n => {
     const r = DB[n] || {};
     const hasKU = Number.isFinite(r?.k) && r?.u && [r.u.hp, r.u.atk, r.u.def, r.u.agi].every(Number.isFinite);
-    
-    // R8_DB에 키가 있고, 그 값이 배열이거나 obs_100_rank8 배열을 갖고 있으며 비어있지 않은지 확인
     const r8Entry = R8_DB[n];
-    const hasR8 = r8Entry && (
-                    (Array.isArray(r8Entry) && r8Entry.length > 0) || 
-                    (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0)
-                  );
+    const hasR8 = r8Entry && ((Array.isArray(r8Entry) && r8Entry.length > 0) || (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0));
 
-    if (currentR8Filter === 'todo_r8') { // R8 작업 (k/u는 있고, R8 데이터는 없음)
-      return hasKU && !hasR8;
-    }
-    if (currentR8Filter === 'has_r8') { // R8 있음
-      return hasR8; // k/u 여부와 상관없이 R8 데이터가 있으면 표시
-    }
-    if (currentR8Filter === 'no_ku') { // k/u 없음
-      return !hasKU;
-    }
-    return true; // 'all'
+    if (currentR8Filter === 'todo_r8') return hasKU && !hasR8;
+    if (currentR8Filter === 'has_r8') return hasR8;
+    // no_ku 제거됨
+    return true; 
   });
-  // --- /신규/수정 ---
 
-  // filteredOrder (기존 ORDER) 기준으로 목록 생성
   filteredOrder.forEach(n=>{
     const r = DB[n]||{};
     const hasKU = Number.isFinite(r?.k) && r?.u && [r.u.hp,r.u.atk,r.u.def,r.u.agi].every(Number.isFinite);
-    
-    // --- 신규: R8_DB 확인 ---
     const r8Entry = R8_DB[n];
-    const hasR8 = r8Entry && (
-                    (Array.isArray(r8Entry) && r8Entry.length > 0) || 
-                    (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0)
-                  );
+    const hasR8 = r8Entry && ((Array.isArray(r8Entry) && r8Entry.length > 0) || (r8Entry.obs_100_rank8 && r8Entry.obs_100_rank8.length > 0));
 
     const lab = document.createElement('label');
     lab.className = "r8item" + (hasKU ? "" : " disabled");
@@ -1083,88 +1029,61 @@ function renderR8List(){
 
     const extra = document.createElement('span'); extra.className = "extra";
     
-    // --- 신규: 태그 로직 수정 (R8_DB 기준) ---
-    if(hasR8){
-      const tag = document.createElement('span'); tag.className="tag ok"; tag.textContent="R8 있음"; 
-      extra.appendChild(tag);
-    }
-    if(r?.ku_override){ 
-      const tag = document.createElement('span'); tag.className="tag warn"; tag.textContent="override"; 
-      extra.appendChild(tag); 
-    }
-    if(!hasKU){ 
-      const tag = document.createElement('span'); tag.className="tag"; tag.textContent="k/u 없음"; 
-      extra.appendChild(tag); 
-    }
-    // --- /신규 ---
+    if(hasR8){ const tag = document.createElement('span'); tag.className="tag ok"; tag.textContent="100% 완료"; extra.appendChild(tag); }
+    if(r?.ku_override){ const tag = document.createElement('span'); tag.className="tag warn"; tag.textContent="override"; extra.appendChild(tag); }
+    if(!hasKU){ const tag = document.createElement('span'); tag.className="tag"; tag.textContent="k/u 없음"; extra.appendChild(tag); }
     
-    lab.appendChild(extra);
-
-    box.appendChild(lab);
+    lab.appendChild(extra); box.appendChild(lab);
   });
 }
 
-// --- 신규: R8 목록 필터 리스너 ---
 document.getElementById("r8FilterChips").addEventListener("click", (e) => {
-  const btn = e.target.closest(".filter-btn");
-  if (!btn) return;
-  
-  const filter = btn.dataset.filter;
-  if (filter === currentR8Filter) return;
+  const btn = e.target.closest(".filter-btn"); if (!btn) return;
+  const filter = btn.dataset.filter; if (filter === currentR8Filter) return;
   currentR8Filter = filter;
-
-  document.querySelectorAll("#r8FilterChips .filter-btn").forEach(b => {
-    b.classList.remove("active");
-  });
-  btn.classList.add("active");
-
-  renderR8List(); // R8 목록만 갱신
+  document.querySelectorAll("#r8FilterChips .filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active"); renderR8List(); 
 });
-// --- /신규 ---
 
 $("btnR8SelectAll").addEventListener("click", ()=>{
-  // 현재 보이는 (필터링된) 목록의 :not(:disabled) 체크박스만 선택
-  document.querySelectorAll("#r8List .r8item:not(.disabled) input[type=checkbox]").forEach(cb => {
-    cb.checked = true;
-  });
+  document.querySelectorAll("#r8List .r8item:not(.disabled) input[type=checkbox]").forEach(cb => cb.checked = true);
 });
 $("btnR8ClearAll").addEventListener("click", ()=>{
-  // 현재 보이는 (필터링된) 목록의 체크박스 모두 해제
   document.querySelectorAll("#r8List input[type=checkbox]").forEach(cb=>cb.checked=false);
 });
-
 
 $("btnR8Run").addEventListener("click", async ()=>{
   const picks = Array.from(document.querySelectorAll("#r8List input[type=checkbox]:checked")).map(cb=>cb.value);
   if(picks.length===0){ alert("대상을 선택하세요."); return; }
 
-  R8_RESULT = {};
-  const skipped = [];
-  const started = performance.now();
+  R8_RESULT = {}; const skipped = []; const started = performance.now();
 
   for(const name of picks){
     const row = DB[name];
     if(!(Number.isFinite(row?.k) && row?.u)){ skipped.push({name,reason:"k/u 없음"}); continue; }
-    const sets = collectR8ObsForKU(row.k, row.u);
-    R8_RESULT[name] = sets || [];
+    const sets = collectR8ObsForKU(row.k, row.u); R8_RESULT[name] = sets || [];
   }
   const ms = Math.round(performance.now()-started);
   const totalSets = Object.values(R8_RESULT).reduce((a,arr)=>a+(arr?.length||0),0);
 
-  const pre = $("r8Preview");
-  pre.style.display="block";
-  pre.className = "callout";
+  const pre = $("r8Preview"); pre.style.display="block"; pre.className = "callout ok";
   pre.innerHTML = `
     <div><b>집계 완료</b> — 대상 ${picks.length}종, 결과 총 <b>${totalSets}</b> 세트, 시간 ${ms}ms</div>
     ${skipped.length? `<div style="margin-top:6px" class="muted">스킵: ${skipped.map(s=>`${s.name}(${s.reason})`).join(', ')}</div>` : ''}
-    <details style="margin-top:8px"><summary>상세 미리보기</summary>
-      ${Object.keys(R8_RESULT).length===0 ? '<div class="muted">없음</div>' : `
-        <table class="table" style="margin-top:8px">
-          <thead><tr><th>이름</th><th>세트 수</th><th>예시</th></tr></thead>
+    <details style="margin-top:8px; cursor:pointer;"><summary style="outline:none; color:var(--text-main);">상세 미리보기</summary>
+      ${Object.keys(R8_RESULT).length===0 ? '<div class="muted" style="margin-top:8px;">없음</div>' : `
+        <table style="width:100%; margin-top:12px; border-collapse:collapse; text-align:left; font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+              <th style="padding:6px; color:var(--text-sub);">이름</th>
+              <th style="padding:6px; color:var(--text-sub);">세트 수</th>
+              <th style="padding:6px; color:var(--text-sub);">예시</th>
+            </tr>
+          </thead>
           <tbody>
             ${Object.entries(R8_RESULT).map(([n,arr])=>{
               const ex = (arr[0] ? `(${arr[0].join(', ')})` : '-');
-              return `<tr><td>${n}</td><td>${arr.length}</td><td>${ex}</td></tr>`;
+              return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:6px;">${n}</td><td style="padding:6px; color:var(--accent); font-weight:700;">${arr.length}</td><td style="padding:6px;" class="mono muted">${ex}</td></tr>`;
             }).join('')}
           </tbody>
         </table>
@@ -1184,101 +1103,41 @@ $("btnR8Commit").addEventListener("click", async ()=>{
 
   const head = await fetch(metaUrl, {headers:{Accept:"application/vnd.github+json"}});
   if(head.status===200){
-    const meta = await head.json();
-    sha = meta.sha;
-    // --- 신규: R8_DB를 기본값으로 사용 ---
+    const meta = await head.json(); sha = meta.sha;
     remoteMap = R8_DB || {}; 
-    // 만약을 위해 최신 데이터 다시 가져오기 시도 (R8_DB가 로드 실패했을 경우)
-    if (Object.keys(remoteMap).length === 0) {
-      try {
-        const text = await fetch(REMOTE_R8).then(r=>r.text());
-        remoteMap = JSON.parse(text);
-      } catch {
-        remoteMap = {};
-      }
-    }
-  }else if(head.status!==404){
-    alert("full.json 메타 조회 실패: HTTP "+head.status); return;
-  } else {
-    // 404 (파일 없음)
-    remoteMap = {};
-    sha = null;
-  }
+    if (Object.keys(remoteMap).length === 0) { try { const text = await fetch(REMOTE_R8).then(r=>r.text()); remoteMap = JSON.parse(text); } catch { remoteMap = {}; } }
+  }else if(head.status!==404){ alert("full.json 메타 조회 실패: HTTP "+head.status); return; } else { remoteMap = {}; sha = null; }
 
   const out = {...remoteMap};
   for(const [name, sets] of Object.entries(R8_RESULT)){
     const prev = (remoteMap[name]?.obs_100_rank8) || remoteMap[name] || [];
-    const prevStr = new Set(prev.map(a=>a.join(',')));
-    const merged = [...prev];
+    const prevStr = new Set(prev.map(a=>a.join(','))); const merged = [...prev];
     sets.forEach(a=>{ const k=a.join(','); if(!prevStr.has(k)) merged.push(a); });
     out[name] = { obs_100_rank8: merged, count: merged.length };
   }
 
   const res = await fetch(metaUrl, {
-    method:"PUT",
-    headers:{
-      "Authorization":`Bearer ${token}`,
-      "Accept":"application/vnd.github+json",
-      "Content-Type":"application/json"
-    },
+    method:"PUT", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
     body: JSON.stringify({
       message: prompt("커밋 메시지 입력", "feat(admin): update guaranteed_rank8.full.json (auto from admin)") || "update guaranteed_rank8.full.json",
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(out, null, 2)))),
-      branch: GH_BRANCH,
-      ...(sha? {sha}: {})
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(out, null, 2)))), branch: GH_BRANCH, ...(sha? {sha}: {})
     })
   });
-  if(!res.ok){
-    const t = await res.text().catch(()=>"(no body)");
-    alert("커밋 실패: " + res.status + "\n" + t);
-    return;
-  }
-  alert("guaranteed_rank8.full.json 커밋 성공!");
-  // --- 신규: 커밋 성공 시 R8_DB 갱신 ---
-  R8_DB = out;
-  renderR8List();
+  if(!res.ok){ const t = await res.text().catch(()=>"(no body)"); alert("커밋 실패: " + res.status + "\n" + t); return; }
+  alert("guaranteed_rank8.full.json 커밋 성공!"); R8_DB = out; renderR8List();
 });
 
 /* ====== 데이터 로드 ====== */
 async function loadRemote(){
   const obj = await fetchJSON(REMOTE_PETS);
-  DB = (obj && !obj.__404__) ? obj : {};
-  sortNames(); 
-  renderList();
-  // renderR8List(); // R8 목록 갱신은 init에서 R8_DB 로드 후 한꺼번에
-  if(ORDER.length && !CURRENT) loadForm(ORDER[0]);
-  saveLS();
+  DB = (obj && !obj.__404__) ? obj : {}; sortNames(); renderList(); if(ORDER.length && !CURRENT) loadForm(ORDER[0]); saveLS();
 }
 (async function init(){
   const local = loadLS();
-  if(local && typeof local==="object"){
-    DB = local;
-    sortNames(); 
-    renderList();
-    // renderR8List(); // R8_DB 로드 후에
-  }
-
-  // Load Pets (DB)
-  try{
-    await loadRemote(); // This fetches pets.json
-  }catch(e){
-    console.warn("원격 로드 실패, 로컬 캐시로 동작", e);
-    if(!local){ DB={}; renderList(); }
-  }
-
-  // --- 신규: R8 DB 로드 ---
-  try {
-    const r8_obj = await fetchJSON(REMOTE_R8);
-    R8_DB = (r8_obj && !r8_obj.__404__) ? r8_obj : {};
-    console.log("R8_DB loaded:", Object.keys(R8_DB).length);
-  } catch(e) {
-    console.warn("R8 원격 로드 실패, 빈 객체로 동작", e);
-    R8_DB = {};
-  }
-  // --- /신규 ---
-
-  renderR8List(); // ★ DB와 R8_DB가 모두 준비된 후 R8 목록 렌더링
-  if(ORDER.length && !CURRENT) loadForm(ORDER[0]); // 첫 번째 아이템 로드
+  if(local && typeof local==="object"){ DB = local; sortNames(); renderList(); }
+  try{ await loadRemote(); }catch(e){ console.warn("원격 로드 실패, 로컬 캐시로 동작", e); if(!local){ DB={}; renderList(); } }
+  try { const r8_obj = await fetchJSON(REMOTE_R8); R8_DB = (r8_obj && !r8_obj.__404__) ? r8_obj : {}; } catch(e) { console.warn("R8 원격 로드 실패, 빈 객체로 동작", e); R8_DB = {}; }
+  renderR8List(); if(ORDER.length && !CURRENT) loadForm(ORDER[0]); 
 })();
 </script>
 </body>
