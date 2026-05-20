@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>happy 놀이터 Admin</title>
+<title>Happy 놀이터 Admin</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Orbit&display=swap" rel="stylesheet">
 <style>
@@ -203,7 +203,7 @@
 <body class="locked">
   <div id="gate" role="dialog" aria-modal="true">
     <div class="panel">
-      <h2>happy 놀이터 ADMIN</h2>
+      <h2>Happy 놀이터 ADMIN</h2>
       <div class="muted" style="font-size:13px; margin-bottom: 10px;">데이터 관리를 위해 비밀번호를 입력하세요.</div>
       <div class="input-row">
         <input id="gate_pass" type="password" placeholder="Password" autocomplete="current-password" />
@@ -214,7 +214,7 @@
   </div>
 
 <header>
-  <div class="brand">happy 놀이터 Admin</div>
+  <div class="brand">Happy 놀이터 Admin</div>
   <div class="right">
     <button class="btn ghost btn-sm" id="btnReload">원격 새로고침</button>
     <button class="btn ghost btn-sm" id="btnExport">pets.json 다운로드</button>
@@ -368,8 +368,8 @@ async function sha256Hex(text){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-function getSess(){ try{ return JSON.parse(sessionStorage.getItem("happy_admin_ok")||"null"); }catch{ return null; } }
-function setSess(){ sessionStorage.setItem("happy_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()})); }
+function getSess(){ try{ return JSON.parse(sessionStorage.getItem("Happy_admin_ok")||"null"); }catch{ return null; } }
+function setSess(){ sessionStorage.setItem("Happy_admin_ok", JSON.stringify({h:ADMIN_PASSWORD_HASH, t:Date.now()})); }
 function sessValid(){ const s = getSess(); return !!(s && s.h===ADMIN_PASSWORD_HASH && (Date.now()-s.t) < LOGIN_TTL_MS); }
 function unlock(){ document.body.classList.remove("locked"); const g = document.getElementById("gate"); if(g) g.remove(); }
 
@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <script>
 /* ====== 설정 ====== */
 const GH_OWNER  = "kkoby-daddy";
-const GH_REPO   = "kkoby_happy";
+const GH_REPO   = "kkoby-daddy.github.io";
 const GH_BRANCH = "main";
 const PETS_PATH = "data/pets.json";
 const R8_PATH   = "data/guaranteed_rank8.full.json";
